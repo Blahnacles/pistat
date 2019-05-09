@@ -86,6 +86,13 @@ class UsbStat:
             self.potential_offset = pOffset
             self.current_offset = cOffest
             self.shunt_calibration = shunt_calibration
+    
+    def dac_calibrate(self):
+        """Activate the automatic DAC1220 calibration function and retrieve the results."""
+        self.send_command(b'DACCAL', b'OK')
+        self.get_dac_settings()
+        # realistically only need dac_offset & dac_gain from the above
+        # Not worth optimising for in alpha, as it increases cyc complexity by a lot
 
     ########################################
     ######## Input/Output functions ########
