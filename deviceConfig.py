@@ -13,25 +13,26 @@ class ToolBox:
         """Toggle device between connected & disconnected
         """
         # Refactored SBL 08/05/2019
+        # Returns False if disconnect successful, and True if connect succesful
+        # Returns None if connect/disconnect failed
         # DISCONNECT:
         if potStat.dev is not None:
             usb.util.dispose_resources(potStat.dev)
             potStat.dev = None
             potStat.state = States.NotConnected
             # TODO Device disconnected msg
-            return
+            return False
         # CONNECT:
         else:
             # Create the device object using the vid & pid
             potStat.dev = usb.core.find(idVendor=int(potStat.vid, 0), idProduct=int(potStat.pid, 0))
-            if potStat.dev is None:
-                # TODO usb device not found error
-                foo = None
-            else:
+            if potStat.dev is not None:
+                # If connection successful, get info & setup
                 # TODO Usb interface connected msg
                 try:
                     potStat.get_dac_settings()
                     potStat.set_cell_status(False)
+                    return True
                 except ValueError:
                     pass # In case device is not yet calibrated
 
@@ -68,10 +69,10 @@ class UsbStat:
         Adapted and combined from get_dac_calibration(), get_offset() and 
         get_shunt_calibration()"""
 
+        ################################
+        # Reading settings from device #
+        ################################
         if self.dev is not None:
-            ################################
-            # Reading settings from device #
-            ################################
             ##### Getting dac offset & gain
             dOffset, dGain = self.flashRead(b'DACCALGET')
             #### Getting potential & current offset
