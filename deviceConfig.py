@@ -1,29 +1,54 @@
 import usb.core, usb.util
 import numpy as np
+import timeit
 
 class States:
-    """Expose a named list of states to be used as a simple state machine."""
-    NotConnected, Idle_Init, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD = range(9)
+    """
+    Named list of states to be used as a simple state machine.
+    NotConnected
+    IdleInit - state for graph initiation
+    Idle - continuous update for graph
 
-class potData:
+    """
+    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD = range(9)
+
+class graphData:
     """ Holds data read from the potentiostat """
-    potentialOffset = 0
-    currentOffset = 0
+    def __init__(self):
+        self.state = States.NotConnected
+        self.potentialOffset = None
+        self.currentOffset = None
+        self.rawPotentialData = None
+        self.rawCurrentData = None
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
         Used to be called zero_offset, offset_changed_callback omitted as it
         is a GUI related function."""
         # Fuck these two lines, has to be a better way - SBL
-        self.potentialOffset = int(round(np.average(list(rawPotentialData))))
-        self.currentOffset = int(round(np.average(list(rawCurrentData))))
+        self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
+        self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
+
+    def idleInit(self):
+        """
+        Prep the graph, initialisation goes here
+        ends by changing to continous update state.
+        """
+        self.state = States.Idle
+    
+    
+
+
     
 class ToolBox:
     """Holds generic potentioStat mgmt functionality & data"""
     ### Toolbox - a compilation of PiStat generic functions
     ### Ported SBL 08/05/2019
 
-    def connect_disconnect_usb(self, potStat):
+    def __init__(self, potStat, potData):
+        self.potStat = potStat
+        self.potData = potData
+    def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
         """
         # Refactored SBL 08/05/2019
@@ -32,48 +57,48 @@ class ToolBox:
         # DISCONNECT:
         if potStat.dev is not None:
             usb.util.dispose_resources(potStat.dev)
-            potStat.dev = None
-            potStat.state = States.NotConnected
+            self.potStat.dev = None
+            self.potData.state = States.NotConnected
             # TODO Device disconnected msg
             return False
         # CONNECT:
         else:
             # Create the device object using the vid & pid
-            potStat.dev = usb.core.find(idVendor=int(potStat.vid, 0), idProduct=int(potStat.pid, 0))
-            if potStat.dev is not None:
+            self.potStat.dev = usb.core.find(idVendor=int(self.potStat.vid, 0), idProduct=int(potStat.pid, 0))
+            if self.potStat.dev is not None:
                 # If connection successful, get info & setup
                 # TODO Usb interface connected msg
                 try:
-                    potStat.get_dac_settings()
-                    potStat.set_cell_status(False)
-                    potStat.state = States.Idle_Init
+                    self.potStat.get_dac_settings()
+                    self.potStat.set_cell_status(False)
+                    self.potData.state = States.IdleInit
                     return True
                 except ValueError:
                     pass # In case device is not yet calibrated
+
+    def dataRead():
+        potData.rawPotentialData, potData.rawCurrentData = self.potStat.readPotentialCurrent()
+        
+        
 
 
 
 class UsbStat:
     """Contains PotentioStat configuration settings"""
-    dev = None # usb device object for the pStat
-    vid = "0xa0a0"
-    pid = "0x0002"
-    dev = None
-    state = States.NotConnected
-    # The following are set by get_dac_settings from dev flash memory
-    #TODO set defaults
-    dac_offset = None
-    dac_gain = None
-    potential_offset = None
-    current_offset = None
-    # Fine adjustment for shunt resistors - R1/10ohm, R2/1kohm, R3/100kohm
-    shunt_calibration = [1.,1.,1.]
-    
-
     def __init__(self):
         """Initialise the system variables"""
-        self.dev = None
-        self.state = States.NotConnected
+        self.dev = None # usb device object for the pStat
+        self.vid = "0xa0a0"
+        self.pid = "0x0002"
+        # The following are set by get_dac_settings from dev flash memory
+        #TODO set defaults
+        self.dac_offset = None
+        self.dac_gain = None
+        self.potential_offset = None
+        self.current_offset = None
+        # Fine adjustment for shunt resistors - R1/10ohm, R2/1kohm, R3/100kohm
+        self.shunt_calibration = [1.,1.,1.]
+        self.timeStamp = None
 
     #######################################
     ######## Calibration functions ########
@@ -161,3 +186,29 @@ class UsbStat:
             self.send_command(b'CELL ON', b'OK')
         else:
             self.send_command(b'CELL OFF', b'OK')
+
+    def readPotentialCurrent(self):
+        """
+        Collect data from the potentiostat.
+        wait_for_adc_read() omitted, as it is explicitly for windows system timing
+        Returns raw potential, and raw current.
+        """
+        def twoCompDec(msb, midb, lsb):
+            """Converts 2s complement to decimal. Now with vastly improved logic"""
+            combined_value = (msb%64)*2**16+midb*2**8+lsb # Get rid of overflow bits
+            ovh = (msb > 63) and (msb < 128) # Check for Theoverflow high (B22 set)
+	        ovl = (msb > 127) # Check for overflow low (B23 set)
+            if ovl or not ovh:
+                return combined_value - 2**22
+            else:
+                return combined_value
+
+
+        self.timeStamp = timeit.default_timer()
+        self.dev.write(0x01,b'ADCREAD') # 0x01 = write address of EP1
+        msg = bytes(dev.read(0x81,64)) # 0x81 = read address of EP1
+        if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
+            p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
+            i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
+            return p,i
+        return None, None
