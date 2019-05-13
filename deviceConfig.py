@@ -1,9 +1,23 @@
 import usb.core, usb.util
+import numpy as np
 
 class States:
     """Expose a named list of states to be used as a simple state machine."""
     NotConnected, Idle_Init, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD = range(9)
 
+class potData:
+    """ Holds data read from the potentiostat """
+    potentialOffset = 0
+    currentOffset = 0
+    def zeroOffset(self):
+        """ Set offset values for pot&current, based on the last few values
+        To be ran after 30 seconds calibration; see SOP for more information
+        Used to be called zero_offset, offset_changed_callback omitted as it
+        is a GUI related function."""
+        # Fuck these two lines, has to be a better way - SBL
+        self.potentialOffset = int(round(np.average(list(rawPotentialData))))
+        self.currentOffset = int(round(np.average(list(rawCurrentData))))
+    
 class ToolBox:
     """Holds generic potentioStat mgmt functionality & data"""
     ### Toolbox - a compilation of PiStat generic functions
@@ -32,9 +46,11 @@ class ToolBox:
                 try:
                     potStat.get_dac_settings()
                     potStat.set_cell_status(False)
+                    potStat.state = States.Idle_Init
                     return True
                 except ValueError:
                     pass # In case device is not yet calibrated
+
 
 
 class UsbStat:
