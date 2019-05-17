@@ -1,6 +1,8 @@
 import usb.core, usb.util
 import numpy as np
-import timeit
+import collections
+import random
+from pyqtgraph.Qt import QtCore, QtGui
 
 class States:
     """
@@ -10,16 +12,19 @@ class States:
     Idle - continuous update for graph
 
     """
-    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD = range(9)
+    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2 = range(11)
 
-class graphData:
+
+
+
+
+class GraphData:
     """ Holds data read from the potentiostat """
     def __init__(self):
-        self.state = States.NotConnected
         self.potentialOffset = None
         self.currentOffset = None
-        self.rawPotentialData = None
-        self.rawCurrentData = None
+        self.rawPotentialData = collections.deque(maxlen=200)
+        self.rawCurrentData = collections.deque(maxlen=200)
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
@@ -29,12 +34,12 @@ class graphData:
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
 
-    def idleInit(self):
-        """
-        Prep the graph, initialisation goes here
-        ends by changing to continous update state.
-        """
-        self.state = States.Idle
+    #def idleInit(self):
+    #    """
+    #    Prep the graph, initialisation goes here
+    #    ends by changing to continous update state.
+    #    """
+    #    self.state = States.Idle
     
     
 
@@ -46,8 +51,14 @@ class ToolBox:
     ### Ported SBL 08/05/2019
 
     def __init__(self, potStat, potData):
+        self.state = States.NotConnected
         self.potStat = potStat
         self.potData = potData
+        self.debug = False
+        p = 1e3*0.09 # read every 90 ms
+        #timer = QtCore.QTimer()
+        #timer.timeout.connect(self.action) # call this function
+        #timer.start(p) # every p ms
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
         """
@@ -55,29 +66,55 @@ class ToolBox:
         # Returns False if disconnect successful, and True if connect succesful
         # Returns None if connect/disconnect failed
         # DISCONNECT:
-        if potStat.dev is not None:
-            usb.util.dispose_resources(potStat.dev)
+        if self.potStat.dev is not None:
+            usb.util.dispose_resources(self.potStat.dev)
             self.potStat.dev = None
-            self.potData.state = States.NotConnected
+            self.state = States.NotConnected
             # TODO Device disconnected msg
             return False
         # CONNECT:
         else:
             # Create the device object using the vid & pid
-            self.potStat.dev = usb.core.find(idVendor=int(self.potStat.vid, 0), idProduct=int(potStat.pid, 0))
+            self.potStat.dev = usb.core.find(idVendor=int(self.potStat.vid, 0), idProduct=int(self.potStat.pid, 0))
             if self.potStat.dev is not None:
                 # If connection successful, get info & setup
                 # TODO Usb interface connected msg
                 try:
                     self.potStat.get_dac_settings()
                     self.potStat.set_cell_status(False)
-                    self.potData.state = States.IdleInit
+                    self.state = States.IdleInit
                     return True
                 except ValueError:
                     pass # In case device is not yet calibrated
 
-    def dataRead():
-        potData.rawPotentialData, potData.rawCurrentData = self.potStat.readPotentialCurrent()
+    def dataRead(self):
+        potential, current = self.potStat.readPotentialCurrent()
+        self.potData.rawPotentialData.append(potential)
+        self.potData.rawCurrentData.append(current)
+
+    def demo1Init(self):
+        """Initialises the system for non-device demo data"""
+        self.state = States.Demo1
+
+    def action(self):
+        # Why doesnt this language implement switch-case????
+        
+        s = self.state
+        if s == States.Demo1:
+            self.demo1DataRead()
+        elif s == States.NotConnected:
+            pass
+
+
+    def demo1DataRead(self):
+        """Adds 1 pseudo-random datapoint when called"""
+        potential = 1e-100*random.randint(0,100)
+        current = 1e-100*random.randint(0,100)
+        self.potData.rawPotentialData.append(potential)
+        self.potData.rawCurrentData.append(current)
+
+
+
         
         
 
@@ -110,9 +147,7 @@ class UsbStat:
         Adapted and combined from get_dac_calibration(), get_offset() and 
         get_shunt_calibration()"""
 
-        ################################
-        # Reading settings from device #
-        ################################
+        # Reading settings from device
         if self.dev is not None:
             ##### Getting dac offset & gain
             dOffset, dGain = self.flashRead(b'DACCALGET')
@@ -197,16 +232,16 @@ class UsbStat:
             """Converts 2s complement to decimal. Now with vastly improved logic"""
             combined_value = (msb%64)*2**16+midb*2**8+lsb # Get rid of overflow bits
             ovh = (msb > 63) and (msb < 128) # Check for Theoverflow high (B22 set)
-	        ovl = (msb > 127) # Check for overflow low (B23 set)
+            ovl = (msb > 127) # Check for overflow low (B23 set)
             if ovl or not ovh:
                 return combined_value - 2**22
             else:
                 return combined_value
 
 
-        self.timeStamp = timeit.default_timer()
+        #self.timeStamp = timeit.default_timer()
         self.dev.write(0x01,b'ADCREAD') # 0x01 = write address of EP1
-        msg = bytes(dev.read(0x81,64)) # 0x81 = read address of EP1
+        msg = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
         if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
             p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
