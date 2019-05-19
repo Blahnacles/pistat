@@ -1,3 +1,4 @@
+import testEngine
 import tkinter as tk
 from tkinter import ttk
 import matplotlib
@@ -6,28 +7,34 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 import matplotlib.animation as animation
 from matplotlib import style
+import timeit
+import time
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
 
 f = Figure(figsize=(5,5), dpi = 100)
 a = f.add_subplot(111)
+xList = []
+yList = []
 
 
-def animate(i):
-    pullData = open("sampleData.txt", "r").read()
-    dataList = pullData.split('\n')
-    xList = []
-    yList = []
-    
-    for eachLine in dataList:
-        if len(eachLine)>1:
-            x, y = eachLine.split(',')
-            xList.append(int(x))
-            yList.append(int(y))
+#p = 1e3*0.09 # read every 90 ms
+p = 1e3*1 # read every second
+psec = 1
+firstRead = timeit.default_timer()
+lastRead = firstRead
+tSum = lastRead
 
+
+def testAnimate(i):
+    testEngine.piStat.action()
+    xList, yList = testEngine.piStat.getData()
     a.clear()
     a.plot(xList, yList)
+    a.axes.set_ylim(0,1)
+    a.axes.set_xlim(0,200)
+
 
 class Deploy(tk.Tk):
 
@@ -79,6 +86,9 @@ class SimpleMode(tk.Frame):
 
         button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()
+        
+        
+        
 
 class ExpertMode(tk.Frame):
 
@@ -133,11 +143,14 @@ class Test1Mode(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        button1 = ttk.Button(self, text="Calibrate and go", command=)
+        button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()
 
+
+
 app = Deploy()
-ani = animation.FuncAnimation(f, animate, interval=1000)
+ani = animation.FuncAnimation(f, testAnimate, interval=50)
+
 app.mainloop()
 
 

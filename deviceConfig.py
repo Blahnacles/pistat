@@ -25,6 +25,8 @@ class GraphData:
         self.currentOffset = None
         self.rawPotentialData = collections.deque(maxlen=200)
         self.rawCurrentData = collections.deque(maxlen=200)
+        self.rawPotentialData.append(0)
+        self.rawCurrentData.append(0.5)
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
@@ -50,12 +52,13 @@ class ToolBox:
     ### Toolbox - a compilation of PiStat generic functions
     ### Ported SBL 08/05/2019
 
-    def __init__(self, potStat, potData):
-        self.state = States.NotConnected
+    def __init__(self, potStat, potData, debugFlag=False):
         self.potStat = potStat
         self.potData = potData
-        self.debug = False
-        p = 1e3*0.09 # read every 90 ms
+        if(debugFlag):
+            self.demo1Init()
+        else:
+            self.state = States.NotConnected
         #timer = QtCore.QTimer()
         #timer.timeout.connect(self.action) # call this function
         #timer.start(p) # every p ms
@@ -97,8 +100,7 @@ class ToolBox:
         self.state = States.Demo1
 
     def action(self):
-        # Why doesnt this language implement switch-case????
-        
+        # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
             self.demo1DataRead()
@@ -108,12 +110,20 @@ class ToolBox:
 
     def demo1DataRead(self):
         """Adds 1 pseudo-random datapoint when called"""
-        potential = 1e-100*random.randint(0,100)
-        current = 1e-100*random.randint(0,100)
-        self.potData.rawPotentialData.append(potential)
-        self.potData.rawCurrentData.append(current)
+        #potential = 1e-100*random.randint(0,100)
+        if self.potData.rawPotentialData[-1] <=200:
+            current = self.potData.rawCurrentData[-1] + 1e-2*random.randint(-10,10)
+            if current <0 or current > 1:
+                current = self.potData.rawCurrentData[-1]
+            potential = self.potData.rawPotentialData[-1] + 1
+            self.potData.rawPotentialData.append(potential)
+            self.potData.rawCurrentData.append(current)
+        else:
+            self.state = States.Idle
 
-
+    def getData(self):
+        """Returns plottable data"""
+        return self.potData.rawPotentialData, self.potData.rawCurrentData
 
         
         
