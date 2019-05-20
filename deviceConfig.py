@@ -98,8 +98,6 @@ class ToolBox:
         potential, current = self.potStat.readPotentialCurrent()
         potential += self.potData.potentialOffset
         current += self.potData.currentOffset
-        print(potential)
-        print(current)
         self.potData.rawPotentialData.append(potential)
         self.potData.rawCurrentData.append(current)
 
@@ -121,8 +119,7 @@ class ToolBox:
             self.state = States.zOffset       
         elif s == States.zOffset:
             # do 50 reads, then offset data
-            if len(self.potData.rawCurrentData) < 100:
-                print(len(self.potData.rawCurrentData))
+            if len(self.potData.rawCurrentData) < 50:
                 self.dataRead()
             else:
                 self.potData.zeroOffset()
@@ -284,6 +281,8 @@ class UsbStat:
         msg = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
         if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
             p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
+            print(p)
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
+            print(i)
             return p,i
         return None, None
