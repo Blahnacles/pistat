@@ -96,6 +96,8 @@ class ToolBox:
 
     def dataRead(self):
         potential, current = self.potStat.readPotentialCurrent()
+        potential += self.potData.potentialOffset
+        current += self.potData.currentOffset
         self.potData.rawPotentialData.append(potential)
         self.potData.rawCurrentData.append(current)
 
@@ -282,5 +284,5 @@ class UsbStat:
             print(p)
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
             print(i)
-            return p+self.potential_offset,i+self.current_offset
+            return p,i
         return None, None
