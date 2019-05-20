@@ -13,7 +13,7 @@ class States:
     Idle - continuous update for graph
 
     """
-    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2 = range(11)
+    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2, zOffset = range(12)
 
 
 
@@ -22,8 +22,8 @@ class States:
 class GraphData:
     """ Holds data read from the potentiostat """
     def __init__(self):
-        self.potentialOffset = None
-        self.currentOffset = None
+        self.potentialOffset = 0
+        self.currentOffset = 0
         self.rawPotentialData = collections.deque(maxlen=200)
         self.rawCurrentData = collections.deque(maxlen=200)
         self.rawPotentialData.append(0)
@@ -103,22 +103,25 @@ class ToolBox:
         """Initialises the system for non-device demo data"""
         self.state = States.Demo1
 
-    def action(self):
+    def action(self,lock):
+        """returns time to sleep for"""
         # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
             self.demo1DataRead()
             print("Demo1")
+            return 0.2
         elif s == States.IdleInit:
             self.connect_disconnect_usb()
             print("idleinit")
-            if self.debugFlag is True:
-                self.states = States.Demo2
+            self.state = States.zOffset       
+        elif s == States.zOffset:
+            # do 50 reads, then offset data
+            if len(self.potData.rawCurrentData) < 50:
+                self.dataRead()
             else:
-                self.states = States.Idle
-            sleep(10)
-            print("sleep finished")
-            self.potData.zeroOffset()
+                self.potData.zeroOffset()
+                self.state = States.Demo2
         elif s == States.Demo2:
             # Reset data sets
             self.potData.rawCurrentData = collections.deque(maxlen=200)
@@ -127,7 +130,8 @@ class ToolBox:
         elif s == States.Idle:
             self.dataRead()
         elif s == States.NotConnected:
-            pass
+            return 0
+        return 0.1
 
 
     def demo1DataRead(self):
@@ -265,7 +269,7 @@ class UsbStat:
             ovh = (msb > 63) and (msb < 128) # Check for Theoverflow high (B22 set)
             ovl = (msb > 127) # Check for overflow low (B23 set)
             if ovl or not ovh:
-                return combined_value - 2**22
+                return (combined_value - 2**22)
             else:
                 return combined_value
 
@@ -278,5 +282,5 @@ class UsbStat:
             print(p)
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
             print(i)
-            return p,i
+            return p+self.potential_offset,i+self.current_offset
         return None, None
