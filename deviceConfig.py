@@ -88,6 +88,7 @@ class ToolBox:
                     self.state = States.Idle
                     return True
                 except ValueError:
+                    print("VE")
                     pass # In case device is not yet calibrated
 
     def dataRead(self):
@@ -259,6 +260,7 @@ class UsbStat:
         #self.timeStamp = timeit.default_timer()
         self.dev.write(0x01,b'ADCREAD') # 0x01 = write address of EP1
         msg = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
+        print(msg)
         if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
             p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
