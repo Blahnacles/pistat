@@ -70,7 +70,7 @@ class SimpleMode(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
+        label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
         
         
@@ -83,8 +83,11 @@ class SimpleMode(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
+        button2.pack()
         button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()
+        
         
         
         
@@ -106,8 +109,7 @@ class ExpertMode(tk.Frame):
 
         button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()
-        button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
-        button2.pack()
+        
 
 
 class UploadData(tk.Frame):
@@ -151,7 +153,7 @@ class Test1Mode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=1)
-
+app.geometry("800x600")
 app.mainloop()
 
 
