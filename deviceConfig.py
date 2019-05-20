@@ -84,11 +84,12 @@ class ToolBox:
                 # TODO Usb interface connected msg
                 try:
                     self.potStat.get_dac_settings()
+                    print("Settings obtained")
                     self.potStat.set_cell_status(False)
+                    print("Cell Set")
                     self.state = States.Idle
                     return True
                 except ValueError:
-                    print("VE")
                     pass # In case device is not yet calibrated
 
     def dataRead(self):
@@ -170,7 +171,6 @@ class UsbStat:
             ##### Getting dac offset & gain
             dOffset, dGain = self.flashRead(b'DACCALGET')
             #### Getting potential & current offset
-            self.dev.write(0x01,b'OFFSETREAD') # 0x01 = write address of EP1
             pOffset, cOffest = self.flashRead(b'OFFSETREAD')
             #### Getting shunt calibration
             shunt_calibration = self.flashRead(b'SHUNTCALREAD')
