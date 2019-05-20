@@ -13,7 +13,7 @@ LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
 
-f = Figure(figsize=(5,5), dpi = 100)
+f = Figure(figsize=(3,2.25), dpi = 100)
 a = f.add_subplot(111)
 xList = []
 yList = []
@@ -153,7 +153,7 @@ class Test1Mode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=1)
-app.geometry("800x600")
+app.geometry("700x500")
 app.mainloop()
 
 
