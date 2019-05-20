@@ -214,8 +214,8 @@ class UsbStat:
                     r = float(2**8*temp[0]+temp[1] - 2**15)
                     shunt_calibration[i] = 1.+r/1e6 # Yields an adjustment range from 0.967 to 1.033 in steps of 1 ppm
             return shunt_calibration
-        output[0] = None
-        output[1] = None
+        output.append(None)
+        output.append(None)
         self.dev.write(0x01,designator) # 0x01 = write address of EP1
         response = bytes(self.dev.read(0x81,64)) # 0x81 = write address of EP1
         # Check for a stored response within the stat's flash memory
