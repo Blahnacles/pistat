@@ -85,7 +85,7 @@ class ToolBox:
                 try:
                     self.potStat.get_dac_settings()
                     self.potStat.set_cell_status(False)
-                    self.state = States.IdleInit
+                    self.state = States.Idle
                     return True
                 except ValueError:
                     pass # In case device is not yet calibrated
@@ -103,7 +103,9 @@ class ToolBox:
         # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
-            self.demo1DataRead()
+            self.demo1DataRead()            
+        elif s == States.Idle:
+            self.dataRead()
         elif s == States.NotConnected:
             pass
 
@@ -119,7 +121,7 @@ class ToolBox:
             self.potData.rawPotentialData.append(potential)
             self.potData.rawCurrentData.append(current)
         else:
-            self.state = States.Idle
+            self.state = States.NotConnected
 
     def getData(self):
         """Returns plottable data"""
