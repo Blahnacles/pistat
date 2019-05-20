@@ -9,7 +9,7 @@ devLock = threading.Lock()
 
 def actionThread():
     while 1:
-        time.sleep(0.2)
+        time.sleep(0.1)
         with devLock:
             piStat.action()
 
