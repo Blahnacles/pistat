@@ -106,7 +106,6 @@ class ToolBox:
     def action(self):
         # Why doesnt this language implement switch-case????    
         s = self.state
-        print("action")
         if s == States.Demo1:
             self.demo1DataRead()
             print("Demo1")

@@ -14,7 +14,7 @@ def actionThread():
 
 def dToggle():
     if piStat.state == dc.States.Demo1:
-        piStat.state = dc.States.Demo2
+        piStat.state = dc.States.IdleInit
     elif piStat.state == dc.States.Demo2:
         piStat.state = dc.States.Demo1
 
