@@ -28,7 +28,6 @@ tSum = lastRead
 
 
 def testAnimate(i):
-    testEngine.piStat.action()
     xList, yList = testEngine.piStat.getData()
     a.clear()
     a.plot(xList, yList)
@@ -149,7 +148,7 @@ class Test1Mode(tk.Frame):
 
 
 app = Deploy()
-ani = animation.FuncAnimation(f, testAnimate, interval=50)
+ani = animation.FuncAnimation(f, testAnimate, interval=1)
 
 app.mainloop()
 
