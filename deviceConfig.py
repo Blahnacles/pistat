@@ -91,6 +91,7 @@ class ToolBox:
                     print("Cell Set")
                     return True
                 except ValueError:
+                    print("value error")
                     pass # In case device is not yet calibrated
 
     def dataRead(self):
