@@ -106,6 +106,8 @@ class ExpertMode(tk.Frame):
 
         button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()
+        button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
+        button2.pack()
 
 
 class UploadData(tk.Frame):

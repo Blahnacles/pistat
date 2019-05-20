@@ -103,7 +103,12 @@ class ToolBox:
         # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
-            self.demo1DataRead()            
+            self.demo1DataRead() 
+        elif s == States.Demo2:
+            # Reset data sets
+            self.potData.rawCurrentData = collections.deque(maxlen=200)
+            self.potData.rawPotentialData = collections.deque(maxlen=200)
+            self.connect_disconnect_usb()          
         elif s == States.Idle:
             self.dataRead()
         elif s == States.NotConnected:

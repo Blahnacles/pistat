@@ -13,9 +13,13 @@ def actionThread():
         with devLock:
             piStat.action()
 
+def dToggle():
+    if piStat.state == dc.States.Demo1:
+        piStat.state = dc.States.Demo2
+    elif piStat.state == dc.States.Demo2:
+        piStat.state = dc.States.Demo1
+
 # Create the daemon thread (exits when main thread exits)
 deviceThread = threading.Thread(target=actionThread,name='deviceThread', daemon=True)
 # Start the daemon thread
 deviceThread.start()
-
-
