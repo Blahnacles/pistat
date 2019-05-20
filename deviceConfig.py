@@ -106,15 +106,19 @@ class ToolBox:
     def action(self):
         # Why doesnt this language implement switch-case????    
         s = self.state
+        print("action")
         if s == States.Demo1:
             self.demo1DataRead()
+            print("Demo1")
         elif s == States.IdleInit:
             self.connect_disconnect_usb()
+            print("idleinit")
             if self.debugFlag is True:
                 self.states = States.Demo2
             else:
                 self.states = States.Idle
             sleep(10)
+            print("sleep finished")
             self.potData.zeroOffset()
         elif s == States.Demo2:
             # Reset data sets
