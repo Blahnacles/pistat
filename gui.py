@@ -31,9 +31,6 @@ def testAnimate(i):
     xList, yList = testEngine.piStat.getData()
     a.clear()
     a.plot(xList, yList)
-    a.axes.set_ylim(0,1)
-    a.axes.set_xlim(0,200)
-
 
 class Deploy(tk.Tk):
 
