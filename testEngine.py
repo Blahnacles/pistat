@@ -1,4 +1,3 @@
-from pyqtgraph.Qt import QtCore, QtGui
 import deviceConfig as dc
 import time
 import threading

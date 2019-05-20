@@ -56,6 +56,7 @@ class ToolBox:
     def __init__(self, potStat, potData, debugFlag=False):
         self.potStat = potStat
         self.potData = potData
+        self.debugFlag = debugFlag
         if(debugFlag):
             self.demo1Init()
         else:
@@ -108,7 +109,7 @@ class ToolBox:
             self.demo1DataRead()
         elif s == States.IdleInit:
             self.connect_disconnect_usb()
-            if debugFlag is True:
+            if self.debugFlag is True:
                 self.states = States.Demo2
             else:
                 self.states = States.Idle
