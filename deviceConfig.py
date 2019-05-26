@@ -96,8 +96,8 @@ class ToolBox:
 
     def dataRead(self):
         potential, current = self.potStat.readPotentialCurrent()
-        potential += self.potData.potentialOffset
-        current += self.potData.currentOffset
+        potential -= self.potData.potentialOffset
+        current -= self.potData.currentOffset
         print(potential)
         print(current)
         self.potData.rawPotentialData.append(potential)
@@ -121,10 +121,11 @@ class ToolBox:
             self.state = States.zOffset       
         elif s == States.zOffset:
             # do 50 reads, then offset data
-            if len(self.potData.rawCurrentData) < 50:
+            if len(self.potData.rawCurrentData) < 30:
                 self.dataRead()
             else:
                 self.potData.zeroOffset()
+                print("Offset Buffer - Voltage",self.potData.potentialOffset,"Current",self.potData.currentOffset)
                 self.state = States.Demo2
         elif s == States.Demo2:
             # Reset data sets
@@ -217,8 +218,10 @@ class UsbStat:
             Returns True if command was properly received, returns False
             if not connected or command rejected by device."""
         if self.dev is not None:
+            ######## BEGIN DEVICE ACCESS
             self.dev.write(0x01, command_string) # 0x01 = write address of EP1
             response = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
+            ######## END DEVICE ACCESS
             if response == expected_response:
                 return True
         return False
@@ -228,8 +231,10 @@ class UsbStat:
         output = []
         if designator == b'SHUNTCALREAD':
             # shunt calibration read has a different return type
+            ######## BEGIN DEVICE ACCESS
             self.dev.write(0x01, designator)
             response = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
+            ######## END DEVICE ACCESS
             if response != bytes([255,255,255,255,255,255]): # If no calibration value has been stored, all bits are set
                 for i in range(0,3):
                     temp = response[2*i:2*i+2]
@@ -238,8 +243,10 @@ class UsbStat:
             return shunt_calibration
         output.append(None)
         output.append(None)
+        ######## BEGIN DEVICE ACCESS
         self.dev.write(0x01,designator) # 0x01 = write address of EP1
         response = bytes(self.dev.read(0x81,64)) # 0x81 = write address of EP1
+        ######## END DEVICE ACCESS
         # Check for a stored response within the stat's flash memory
         if response != bytes([255,255,255,255,255,255]):
                 res = response[0:3]
@@ -277,10 +284,10 @@ class UsbStat:
             else:
                 return combined_value
 
-
-        #self.timeStamp = timeit.default_timer()
+        ######## BEGIN DEVICE ACCESS
         self.dev.write(0x01,b'ADCREAD') # 0x01 = write address of EP1
         msg = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
+        ######## END DEVICE ACCESS
         if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
             p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
