@@ -25,12 +25,25 @@ psec = 1
 firstRead = timeit.default_timer()
 lastRead = firstRead
 tSum = lastRead
+ani = None
 
 
 def testAnimate(i):
     xList, yList = testEngine.piStat.getData()
     a.clear()
     a.plot(xList, yList)
+
+def test2Animate():
+    pList, cList = testEngine.piStat.getData()
+    a.clear()
+    a.plot(pList)
+
+def modeToggle():
+    global ani
+    ani.repeat = False
+    ani = animation.FuncAnimation(f, test2Animate, interval=1)
+    testEngine.dToggle()
+
 
 class Deploy(tk.Tk):
 
@@ -150,7 +163,7 @@ class Test1Mode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=1)
-app.geometry("700x500")
+app.geometry("500x300")
 app.mainloop()
 
 
