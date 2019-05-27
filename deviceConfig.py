@@ -96,7 +96,7 @@ class ToolBox:
 
     def dataRead(self):
         potential, current = self.potStat.readPotentialCurrent()
-        shuntSel = self.PotStat.shuntSelector
+        shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**currentrange)
