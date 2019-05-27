@@ -120,7 +120,7 @@ class ToolBox:
             self.state = States.zOffset       
         elif s == States.zOffset:
             # do 50 reads, then offset data
-            if len(self.potData.rawCurrentData) < 30:
+            if len(self.potData.rawCurrentData) < 150:
                 self.dataRead()
             else:
                 self.potData.zeroOffset()
