@@ -96,8 +96,10 @@ class ToolBox:
 
     def dataRead(self):
         potential, current = self.potStat.readPotentialCurrent()
-        potential -= self.potData.potentialOffset
-        current -= self.potData.currentOffset
+        shuntSel = self.PotStat.shuntSelector
+        sc = self.potStat.shunt_calibration[shuntSel]
+        potential = (potential - self.potData.potentialOffset)/2097152.*8.
+        current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**currentrange)
         print(potential)
         print(current)
         self.potData.rawPotentialData.append(potential)
@@ -178,6 +180,7 @@ class UsbStat:
         # Fine adjustment for shunt resistors - R1/10ohm, R2/1kohm, R3/100kohm
         self.shunt_calibration = [1.,1.,1.]
         self.timeStamp = None
+        self.shuntSelector = 0
 
     #######################################
     ######## Calibration functions ########
