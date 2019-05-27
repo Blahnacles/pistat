@@ -113,7 +113,6 @@ class ToolBox:
         s = self.state
         if s == States.Demo1:
             self.demo1DataRead()
-            print("Demo1")
             return 0.2
         elif s == States.IdleInit:
             self.connect_disconnect_usb()
@@ -125,7 +124,9 @@ class ToolBox:
                 self.dataRead()
             else:
                 self.potData.zeroOffset()
+                print("------------------------------------------")
                 print("Offset Buffer - Voltage",self.potData.potentialOffset,"Current",self.potData.currentOffset)
+                print("------------------------------------------")
                 self.state = States.Demo2
         elif s == States.Demo2:
             # Reset data sets
