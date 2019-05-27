@@ -40,7 +40,6 @@ def test2Animate():
 
 def modeToggle():
     global ani
-    ani.repeat = False
     ani = animation.FuncAnimation(f, test2Animate, interval=1)
     testEngine.dToggle()
 
