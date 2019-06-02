@@ -31,6 +31,9 @@ ani = None
 def testAnimate(i):
     xList, yList = testEngine.piStat.getData()
     a.clear()
+    if testEngine.piStat.offsetBin:
+        axes = a.gca()
+        axes.set_ylim([-1,1])
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
     else:
