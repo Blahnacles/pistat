@@ -64,6 +64,7 @@ class ToolBox:
         #timer = QtCore.QTimer()
         #timer.timeout.connect(self.action) # call this function
         #timer.start(p) # every p ms
+        self.offsetBin = False
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
         """
@@ -100,6 +101,9 @@ class ToolBox:
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
+        # autorange and current units not properly implemented, displaying as uA in working branch
+        # TODO implement autorange & unit mgmt
+        current *= 1e3
         print(potential)
         print(current)
         self.potData.rawPotentialData.append(potential)
@@ -130,6 +134,7 @@ class ToolBox:
                 print("Offset Buffer - Voltage",self.potData.potentialOffset,"Current",self.potData.currentOffset)
                 print("------------------------------------------")
                 self.state = States.Demo2
+                self.offsetBin = True
         elif s == States.Demo2:
             # Reset data sets
             self.potData.rawCurrentData = collections.deque(maxlen=200)
