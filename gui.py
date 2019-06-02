@@ -31,16 +31,19 @@ ani = None
 def testAnimate(i):
     xList, yList = testEngine.piStat.getData()
     a.clear()
-    a.plot(xList, yList)
+    if testEngine.piStat.state==testEngine.dc.States.Demo1:
+        a.plot(xList, yList)
+    else:
+        a.plot(xList)
+        a.plot(yList)
 
 def test2Animate():
     pList, cList = testEngine.piStat.getData()
+
     a.clear()
     a.plot(pList)
 
 def modeToggle():
-    global ani
-    ani = animation.FuncAnimation(f, test2Animate, interval=1)
     testEngine.dToggle()
 
 
