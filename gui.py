@@ -35,7 +35,7 @@ def testAnimate(i):
         # Set the axes once offset has changed
         # set lower limit to 110% of the offset
         h = testEngine.piStat.potData.potentialOffset*1.1
-        a.axes.set_ylim(h,2)
+        a.axes.set_ylim(-h,2)
         # Reset the offsetBin once it has been checked
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
