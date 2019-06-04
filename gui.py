@@ -34,12 +34,8 @@ def testAnimate(i):
     if testEngine.piStat.offsetBin:
         # Set the axes once offset has changed
         # Testing 2 methods for axes:
-        try:
-            # first try setting subplot axes
-            a.gca().set_ylim(-1,1)
-        except:
-            # or set the figure axes on exception
-            f.gca().set_ylim(-1,1)
+        # first try setting subplot axes
+        a.gca().set_ylim(-1,1)
         # Reset the offsetBin once it has been checked
         testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
