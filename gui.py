@@ -31,7 +31,7 @@ ani = None
 def testAnimate(i):
     xList, yList = testEngine.piStat.getData()
     a.clear()
-    if testEngine.piStat.offsetBin:
+    if testEngine.piStat.offsetBin&False:
         # Set the axes once offset has changed
         # set lower limit to 110% of the offset
         h = testEngine.piStat.potData.potentialOffset*1.1
