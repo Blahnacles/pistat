@@ -110,8 +110,8 @@ class SimpleMode(tk.Frame):
         #canvas.get_tk_widget().grid(row=2, column=1, columnspan=3, rowspan=4)#sticky=E+W+S+N
         #Adding Toolbar to Graph
 
-        toolbar = NavigationToolbar2Tk(canvas, self)
-        toolbar.update()
+        #toolbar = NavigationToolbar2Tk(canvas, self)
+        #toolbar.update()
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         canvas._tkcanvas.grid(row=5, column=1)
         #Adding Buttons to start functionality
