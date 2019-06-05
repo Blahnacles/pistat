@@ -90,7 +90,7 @@ class SimpleMode(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
         label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        #label.pack(pady=10,padx=10)
         
         #values of the potential and current
 
