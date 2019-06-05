@@ -41,7 +41,6 @@ def testAnimate(i):
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
     else:
-        SimpleMode.potentialLabel.configure(text=xList[-1])
         a.plot(xList)
         a.plot(yList)
 
@@ -90,40 +89,56 @@ class SimpleMode(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
+
+        #Setting weight of grid, to make a large area in the middle for our graph
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=6)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=5)
+        self.grid_rowconfigure(3, weight=1)
+
         label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        #label.pack(pady=10,padx=10)
-        
-        #values of the potential and current
+        label.grid(row=0, column=1)
 
         potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
+        potentialLabel.grid(row=1, column=1, pady=5)
+
+        #values of the potential and current
+
+        potentialData = tk.Label(self, text="0.000", font=LARGE_FONT)
         #potentialLabel.pack(side=LEFT, pady=10, padx=10)
-        potentialLabel.grid(row=0, column=0)
+        potentialData.grid(row=1, column=1, pady=5)
 
         currentLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
+        currentLabel.grid(row=1, column=1, pady=5)
+
+        currentData = tk.Label(self, text="0.000", font=LARGE_FONT)
         #currentLabel.pack(side=LEFT, pady=10, padx=10)
-        currentLabel.grid(row=0, column=1)
+        currentData.grid(row=1, column=1, pady=5)
 
         #Plotting the Graph
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
         #canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas.get_tk_widget().grid(row=2, column=1, columnspan=3, rowspan=6, sticky='ewns')#sticky=E+W+S+N
+        canvas.get_tk_widget().grid(row=2, column=1, sticky=E+W+S+N)
         #Adding Toolbar to Graph
 
-        #toolbar = NavigationToolbar2Tk(canvas, self)
-        #toolbar.update()
+        toolbar = NavigationToolbar2Tk(canvas, self)
+        toolbar.update()
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas._tkcanvas.grid(row=5, column=1)
+        canvas._tkcanvas.grid(row=2, column=1)
         #Adding Buttons to start functionality
 
         button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
         #button2.pack(side=RIGHT, padx=5, pady=5)
-        button2.grid(row=5, column=4)
+        button2.grid(row=3, column=2)
         button1 = ttk.Button(self, text="Calibrate and go")
         #button1.pack(side=RIGHT, padx=5, pady=5)
-        button1.grid(row=5, column=5)
-    
+        button1.grid(row=3, column=2)
         
         
         
