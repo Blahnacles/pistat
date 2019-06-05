@@ -41,7 +41,7 @@ def testAnimate(i):
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
     else:
-        SimpleMode.labelChange(xList[-1])
+        SimpleMode.potentialLabel.configure(text=xList[-1])
         a.plot(xList)
         a.plot(yList)
 
@@ -95,9 +95,9 @@ class SimpleMode(tk.Frame):
         
         #values of the potential and current
 
-        self.potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
+        potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
         #potentialLabel.pack(side=LEFT, pady=10, padx=10)
-        self.potentialLabel.grid(row=0, column=0)
+        potentialLabel.grid(row=0, column=0)
 
         currentLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
         #currentLabel.pack(side=LEFT, pady=10, padx=10)
@@ -124,8 +124,6 @@ class SimpleMode(tk.Frame):
         #button1.pack(side=RIGHT, padx=5, pady=5)
         button1.grid(row=5, column=5)
     
-    def labelChange(self,p):
-        self.potentialLabel.configure(text=p)
         
         
         
