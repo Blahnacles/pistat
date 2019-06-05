@@ -97,7 +97,7 @@ class SimpleMode(tk.Frame):
 
         self.potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
         #potentialLabel.pack(side=LEFT, pady=10, padx=10)
-        potentialLabel.grid(row=0, column=0)
+        self.potentialLabel.grid(row=0, column=0)
 
         currentLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
         #currentLabel.pack(side=LEFT, pady=10, padx=10)
