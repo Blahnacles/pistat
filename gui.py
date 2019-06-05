@@ -34,8 +34,8 @@ def testAnimate(i):
     if testEngine.piStat.offsetBin:
         # Set the axes once offset has changed
         # set lower limit to 110% of the offset
-        h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
-        a.axes.set_ylim(-h,h)
+        #h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
+        a.axes.set_ylim(-20,2)
         # Reset the offsetBin once it has been checked
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
@@ -63,8 +63,8 @@ class Deploy(tk.Tk):
 
         container.pack(side="top", fill="both", expand = True)
 
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        container.grid_rowconfigure(1, weight=1)
+        container.grid_columnconfigure(1, weight=1)
 
         self.frames = {}
 
@@ -92,20 +92,36 @@ class SimpleMode(tk.Frame):
         label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
         
-        
+        #values of the potential and current
+
+        potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
+        #potentialLabel.pack(side=LEFT, pady=10, padx=10)
+        potentialLabel.grid(row=0, column=0)
+
+        currentLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
+        #currentLabel.pack(side=LEFT, pady=10, padx=10)
+        currentLabel.grid(row=0, column=1)
+
+        #Plotting the Graph
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        #canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        canvas.get_tk_widget().grid(row=2, column=1, columnspan=3, rowspan=4, sticky=E+W+S+N)
+        #Adding Toolbar to Graph
 
         toolbar = NavigationToolbar2Tk(canvas, self)
         toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        canvas._tkcanvas.grid(row=5, column=1)
+        #Adding Buttons to start functionality
 
         button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
-        button2.pack()
+        #button2.pack(side=RIGHT, padx=5, pady=5)
+        button2.grid(row=5, column=4)
         button1 = ttk.Button(self, text="Calibrate and go")
-        button1.pack()
+        #button1.pack(side=RIGHT, padx=5, pady=5)
+        button1.grid(row=5, column=5)
         
         
         
