@@ -135,10 +135,10 @@ class ToolBox:
                 print("------------------------------------------")
                 self.state = States.Demo2
                 self.offsetBin = True
+                # Reset data sets
+                self.potData.rawCurrentData = collections.deque(maxlen=200)
+                self.potData.rawPotentialData = collections.deque(maxlen=200)
         elif s == States.Demo2:
-            # Reset data sets
-            self.potData.rawCurrentData = collections.deque(maxlen=200)
-            self.potData.rawPotentialData = collections.deque(maxlen=200)
             self.dataRead()
         elif s == States.Idle:
             self.dataRead()
