@@ -34,8 +34,8 @@ def testAnimate(i):
     if testEngine.piStat.offsetBin:
         # Set the axes once offset has changed
         # set lower limit to 110% of the offset
-        #h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
-        a.axes.set_ylim(-20,2)
+        h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
+        a.axes.set_ylim(-h,h)
         # Reset the offsetBin once it has been checked
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
@@ -63,8 +63,8 @@ class Deploy(tk.Tk):
 
         container.pack(side="top", fill="both", expand = True)
 
-        container.grid_rowconfigure(1, weight=1)
-        container.grid_columnconfigure(1, weight=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
 
@@ -89,56 +89,23 @@ class SimpleMode(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-
-        #Setting weight of grid, to make a large area in the middle for our graph
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=6)
-        self.grid_columnconfigure(2, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=5)
-        self.grid_rowconfigure(3, weight=1)
-
         label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        label.grid(row=0, column=1)
-
-        potentialLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
-        potentialLabel.grid(row=1, column=1, pady=5)
-
-        #values of the potential and current
-
-        potentialData = tk.Label(self, text="0.000", font=LARGE_FONT)
-        #potentialLabel.pack(side=LEFT, pady=10, padx=10)
-        potentialData.grid(row=1, column=1, pady=5)
-
-        currentLabel = tk.Label(self, text="0.000", font=LARGE_FONT)
-        currentLabel.grid(row=1, column=1, pady=5)
-
-        currentData = tk.Label(self, text="0.000", font=LARGE_FONT)
-        #currentLabel.pack(side=LEFT, pady=10, padx=10)
-        currentData.grid(row=1, column=1, pady=5)
-
-        #Plotting the Graph
+        label.pack(pady=10,padx=10)
+        
+        
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
-        #canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas.get_tk_widget().grid(row=2, column=1, sticky='ewsn')
-        #Adding Toolbar to Graph
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        #toolbar = NavigationToolbar2Tk(canvas, self)
-        #toolbar.update()
-        #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas._tkcanvas.grid(row=2, column=1)
-        #Adding Buttons to start functionality
+        toolbar = NavigationToolbar2Tk(canvas, self)
+        toolbar.update()
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
-        #button2.pack(side=RIGHT, padx=5, pady=5)
-        button2.grid(row=3, column=2)
+        button2.pack()
         button1 = ttk.Button(self, text="Calibrate and go")
-        #button1.pack(side=RIGHT, padx=5, pady=5)
-        button1.grid(row=3, column=2)
+        button1.pack()
         
         
         
