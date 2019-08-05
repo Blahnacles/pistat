@@ -25,7 +25,9 @@ class GraphData:
         self.potentialOffset = 0
         self.currentOffset = 0
         self.rawPotentialData = collections.deque(maxlen=200)
+        self.potentialData = collections.deque(maxlen=200)
         self.rawCurrentData = collections.deque(maxlen=200)
+        self.currentData = collections.deque(maxlen=200)
         self.rawPotentialData.append(0)
         self.rawCurrentData.append(0.5)
         self.currentRange = b'RANGE 1'
@@ -108,7 +110,12 @@ class ToolBox:
         print(potential)
         print(current)
         self.potData.rawPotentialData.append(potential)
+        self.potData.potentialData.append(potential)
         self.potData.rawCurrentData.append(current)
+        if self.currentRange == b'RANGE 3':
+            current *= 1e3
+        self.potData.currentData.append(current)
+        
 
     def demo1Init(self):
         """Initialises the system for non-device demo data"""
