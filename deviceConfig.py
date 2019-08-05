@@ -104,9 +104,6 @@ class ToolBox:
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
-        # autorange and current units not properly implemented, displaying as uA in working branch
-        # TODO implement autorange & unit mgmt
-        current *= 1e3
         print(potential)
         print(current)
         self.potData.rawPotentialData.append(potential)
