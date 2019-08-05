@@ -28,12 +28,13 @@ class GraphData:
         self.rawCurrentData = collections.deque(maxlen=200)
         self.rawPotentialData.append(0)
         self.rawCurrentData.append(0.5)
+        self.currentRange = b'RANGE 1'
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
         Used to be called zero_offset, offset_changed_callback omitted as it
         is a GUI related function."""
-        # Fuck these two lines, has to be a better way - SBL
+        # Screw these two lines, has to be a better way - SBL
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
 
@@ -88,7 +89,7 @@ class ToolBox:
                 try:
                     self.potStat.get_dac_settings()
                     print("Settings obtained")
-                    self.potStat.set_cell_status(False)
+                    self.potStat.setCellStatus(False)
                     print("Cell Set")
                     return True
                 except ValueError:
@@ -123,7 +124,7 @@ class ToolBox:
         elif s == States.IdleInit:
             self.connect_disconnect_usb()
             print("idleinit")
-            self.state = States.zOffset       
+            self.state = States.zOffset    
         elif s == States.zOffset:
             # do 50 reads, then offset data
             if len(self.potData.rawCurrentData) < 150:
@@ -135,9 +136,11 @@ class ToolBox:
                 print("------------------------------------------")
                 self.state = States.Demo2
                 self.offsetBin = True
+                # Turn cell on after offset created
+                self.potStat.setCellStatus(True)
                 # Reset data sets
-                self.potData.rawCurrentData = collections.deque(maxlen=200)
-                self.potData.rawPotentialData = collections.deque(maxlen=200)
+                self.potData.rawCurrentData.clear()
+                self.potData.rawPotentialData.clear()
         elif s == States.Demo2:
             self.dataRead()
         elif s == States.Idle:
@@ -163,6 +166,29 @@ class ToolBox:
     def getData(self):
         """Returns plottable data"""
         return self.potData.rawPotentialData, self.potData.rawCurrentData
+    
+    def autoRange(self):
+        """Uses a selected sample of data to determine an appropriate current range
+        from the values: 2uA, 200uA & 20mA. Then uses this value to set the desired shunt resistor,
+        and format the data."""
+        size = len(self.potData.rawCurrentData)
+        iVals = list(self.potData.rawCurrentData)[size-20:size]
+        iMean = abs(sum(iVals)/size)
+        if iMean <= 0.002:
+            # 2uA range - RANGE 1
+            cRange = b'RANGE 1'
+        elif iMean <= 0.2:
+            # 200uA range - RANGE 2
+            cRange = b'RANGE 2'
+        else:
+            # 20mA range - RANGE 3
+            cRange = b'RANGE 3'
+        # The more I type range, the less it seems like a word
+        # range range range range range
+        # set range within data object
+        self.potData.currentRange = cRange
+        # change current range setting on hardware
+        self.potStat.send_command(cRange, b'OK')
 
         
         
@@ -270,7 +296,7 @@ class UsbStat:
             output
         return output[0], output[1]
 
-    def set_cell_status(self, cell_on_boolean):
+    def setCellStatus(self, cell_on_boolean):
         """Switch the cell connection (True = cell on, False = cell off)."""
         if cell_on_boolean:
             self.send_command(b'CELL ON', b'OK')
