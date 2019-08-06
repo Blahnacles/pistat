@@ -8,7 +8,7 @@ devLock = threading.Lock()
 
 def actionThread():
     while 1:
-        time.sleep(piStat.action(devLock))
+        time.sleep(piStat.testAction(devLock))
 
 def dToggle():
     if piStat.state == dc.States.Demo1:

@@ -40,6 +40,12 @@ class GraphData:
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
 
+    def clearData(self):
+        self.rawPotentialData.clear()
+        self.rawCurrentData.clear()
+        self.currentData.clear()
+        self.potentialData.clear()
+
     #def idleInit(self):
     #    """
     #    Prep the graph, initialisation goes here
@@ -119,7 +125,48 @@ class ToolBox:
         self.state = States.Demo1
 
     def action(self,lock):
-        """returns time to sleep for"""
+        """State machine for regular cyclic voltammetry operation. Added 06/08/2019 SBL"""
+        s = self.state
+        if s == States.IdleInit:
+            # IdleInit means a connection to the device has not been made
+            if not self.connect_disconnect_usb():
+                # If connection fails, try every 5 seconds
+                print("error: failed to connect")
+                sleep(5)
+            else:
+                sleep(30)
+                self.potStat.dac_calibrate()
+                self.state = States.zOffset
+        elif s == States.zOffset:
+            # Clear the data sets
+            self.potData.clearData()
+            # read 20 times for reliable offset values
+            # TODO confirm 20 is enough for reliability
+            for i in range(20):
+                self.potStat.readPotentialCurrent()
+            self.potData.zeroOffset()
+            # sanitise data once again, to prepare for current ranging
+            self.potData.clearData()
+            for i in range(20):
+                # read 20 times for reliable current ranging
+                self.potStat.readPotentialCurrent()
+            # set current range, & finally sanitise data
+            self.autoRange()
+            self.potData.clearData()
+            # enter idle data reading stage
+            self.state = States.Idle
+        elif s == States.Idle:
+            # mindlessly read data in idle mode.
+            self.potStat.readPotentialCurrent()
+
+
+
+
+
+    def testAction(self,lock):
+        """demo action function, changed from action to testAction 06/08/2019
+        defunct in future release, new demo to be made for completed UI
+        returns time to sleep for"""
         # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
