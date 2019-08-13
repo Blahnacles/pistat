@@ -13,7 +13,7 @@ class States:
     Idle - continuous update for graph
 
     """
-    NotConnected, IdleInit, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2, zOffset = range(12)
+    NotConnected, IdleInit, Idle, PD_Init, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2, zOffset = range(12)
 
 
 
@@ -99,6 +99,8 @@ class ToolBox:
                     print("Settings obtained")
                     self.potStat.setCellStatus(False)
                     print("Cell Set")
+                    self.potStat.send_command(b'POTENTIOSTATIC', b'OK')
+                    print("Potentiostatic mode")
                     return True
                 except ValueError:
                     print("value error")
@@ -158,6 +160,27 @@ class ToolBox:
         elif s == States.Idle:
             # mindlessly read data in idle mode.
             self.potStat.readPotentialCurrent()
+        elif s == States.PD_Init:
+            # initialise device for pulse/deposition
+            self.potStat.vOutput()
+            self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
+            self.potStat.setCellStatus(True) # cell on
+            self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
+            for j in range(1:2):
+                for i in range(1:20):
+                    self.potStat.readPotentialCurrent() # 20 reads
+                    sleep(0.1)
+                self.autoRange() # autorange based on 20 reads, then clear data
+                self.potData.clearData()
+            self.state = States.Measuring_PD # enter measurement state
+        elif s == States.Measuring_PD:
+
+
+
+
+
+
+
 
 
 
@@ -220,7 +243,8 @@ class ToolBox:
     
     def autoRange(self):
         """Uses a selected sample of data to determine an appropriate current range
-        from the values: 2uA, 200uA & 20mA. Then uses this value to set the desired shunt resistor,
+        from the values: 2uA, 200uA & 20mA.
+        Then uses this value to set the desired shunt resistor,
         and format the data."""
         size = len(self.potData.rawCurrentData)
         iVals = list(self.potData.rawCurrentData)[size-20:size]
@@ -263,6 +287,7 @@ class UsbStat:
         self.shunt_calibration = [1.,1.,1.]
         self.timeStamp = None
         self.shuntSelector = 0
+        self.fwdPotential = 1 # in volts
 
     #######################################
     ######## Calibration functions ########
@@ -379,3 +404,14 @@ class UsbStat:
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
             return p,i
         return None, None
+    def vOutput(self, value=1):
+        self.send_command(b'DACSET '+self.ddb(value/8/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
+
+    def ddb(v):
+        # TODO make it pretty
+        code = 2**19 + int(round(value)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
+	    code = np.clip(code, 0, 2**20 - 1) # If the input exceeds the boundaries of the 20-bit integer, clip it
+	    byte1 = code // 2**12
+	    byte2 = (code % 2**12) // 2**4
+	    byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
+	    return bytes([byte1,byte2,byte3])
