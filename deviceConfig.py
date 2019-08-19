@@ -4,6 +4,7 @@ import collections
 import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
+from datetime import datetime
 
 class States:
     """
@@ -13,7 +14,7 @@ class States:
     Idle - continuous update for graph
 
     """
-    NotConnected, IdleInit, Idle, PD_Init, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2, zOffset = range(12)
+    NotConnected, IdleInit, Idle, PDInit, Stationary_Graph, Measuring_CV, CVInit, Measuring_CD, Measuring_Rate, Measuring_PD, Demo1, Demo2, zOffset = range(13)
 
 
 
@@ -31,6 +32,8 @@ class GraphData:
         self.rawPotentialData.append(0)
         self.rawCurrentData.append(0.5)
         self.currentRange = b'RANGE 1'
+        self.timeStamp = None # to hold start time for sweep data
+        self.lastTime = None
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
@@ -40,6 +43,32 @@ class GraphData:
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
 
+    def sweepCalc(self, dT, uV, vV, uBound, lBound,rate,cycles):
+        """Return the potential after a given time differential along a cv ramp
+        dT (s): elapsed time differential, from beginning of scan to current data point
+        uV (V): initial voltage
+        vV (V): final voltage
+        uBound (V): voltage ceiling
+        lBound (V): voltage floor
+        scanrate (V/s): rate by which the voltage should vary with respect to time
+        """
+        phase1 = uBound - uV # Potential to traverse in first stage
+        phase2 = (uBound-lBound)*2.*cycles
+        phase3 = abs(vV-uBound)
+        sweepVal = rate*dT
+        if sweepVal < phase1: # Have not passed first ramp
+            return uV + sweepVal # Therefore simply add the differential to the initial potential
+        elif sweepVal < phase1+phase2: # Mid Cycle
+            sweepVal -= phase1
+            return lBound + abs((sweepVal)%(2*(uBound-lBound))-(uBound-lBound))
+        elif sweepVal < phase1+phase2+phase3:
+            sweepVal -= phase1 + phase2
+            if vV > uBound:
+                return uBound + sweepVal
+            else:
+                return uBound - sweepVal
+        else:
+            return None
     def clearData(self):
         self.rawPotentialData.clear()
         self.rawCurrentData.clear()
@@ -146,21 +175,45 @@ class ToolBox:
             # TODO confirm 20 is enough for reliability
             for i in range(20):
                 self.potStat.readPotentialCurrent()
+                sleep(0.1)
             self.potData.zeroOffset()
             # sanitise data once again, to prepare for current ranging
             self.potData.clearData()
             for i in range(20):
                 # read 20 times for reliable current ranging
                 self.potStat.readPotentialCurrent()
+                sleep(0.1)
             # set current range, & finally sanitise data
             self.autoRange()
             self.potData.clearData()
             # enter idle data reading stage
             self.state = States.Idle
         elif s == States.Idle:
-            # mindlessly read data in idle mode.
-            self.potStat.readPotentialCurrent()
-        elif s == States.PD_Init:
+            sleep(1)
+        elif s == States.CVInit:
+            self.potStat.vOutput(value=-0.4) # setting the starting potential
+            self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
+            self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
+            self.potStat.setCellStatus(True) # Cell on
+            for j in range(1:3):
+                for i in range(1:20):
+                    self.potStat.readPotentialCurrent() # 20 reads
+                    sleep(0.1)
+                self.autoRange() # autorange after 20 reads
+                self.potData.clearData() # clear data, complete 3 times
+            self.stat = States.Measuring_CV
+            self.potData.timeStamp = datetime.now()
+            self.potData.lastTime= datetime.now()
+        elif s == States.Measuring_CV:
+            dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
+            dT = dT.second + dT.microsecond * 1e-6 # seconds elapsed, as float
+            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
+            if voltage == None:
+                self.state = States.Idle
+            else:
+                self.potStat.vOutput(value=voltage)
+                self.potStat.readPotentialCurrent()
+        elif s == States.PDInit:
             # initialise device for pulse/deposition
             self.potStat.vOutput()
             self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
@@ -173,7 +226,8 @@ class ToolBox:
                 self.autoRange() # autorange based on 20 reads, then clear data
                 self.potData.clearData()
             self.state = States.Measuring_PD # enter measurement state
-        elif s == States.Measuring_PD:
+        
+        
 
 
 
@@ -288,6 +342,7 @@ class UsbStat:
         self.timeStamp = None
         self.shuntSelector = 0
         self.fwdPotential = 1 # in volts
+        self.startPot = -0.4
 
     #######################################
     ######## Calibration functions ########
