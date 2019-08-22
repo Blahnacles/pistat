@@ -16,6 +16,13 @@ def dToggle():
     elif piStat.state == dc.States.Demo2:
         piStat.state = dc.States.Demo1
 
+def getData():
+    devLock.acquire()
+    potentialData = piStat.potData.potentialData
+    currentData = piStat.potData.currentData
+    devLock.release()
+    return potentialData, currentData
+
 # Create the daemon thread (exits when main thread exits)
 deviceThread = threading.Thread(target=actionThread,name='deviceThread', daemon=True)
 # Start the daemon thread

@@ -5,6 +5,7 @@ import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
 from datetime import datetime
+import pandas
 # comment here
 
 class States:
@@ -75,6 +76,14 @@ class GraphData:
         self.rawCurrentData.clear()
         self.currentData.clear()
         self.potentialData.clear()
+    def loadData(filename):
+        # loads potential/current data from a given .csv file
+        try:
+            data = pandas.read_csv(filename)
+            self.potentialData = data.values[:,0]
+            self.currentData = data.values[:,1]
+        except Exception as e:
+            pass
 
     #def idleInit(self):
     #    """
@@ -175,14 +184,18 @@ class ToolBox:
             # read 20 times for reliable offset values
             # TODO confirm 20 is enough for reliability
             for i in range(20):
-                self.potStat.readPotentialCurrent()
+                lock.acquire()
+                self.dataRead()
+                lock.release()
                 sleep(0.1)
             self.potData.zeroOffset()
             # sanitise data once again, to prepare for current ranging
             self.potData.clearData()
             for i in range(20):
                 # read 20 times for reliable current ranging
-                self.potStat.readPotentialCurrent()
+                lock.acquire()
+                self.dataRead()
+                lock.release()
                 sleep(0.1)
             # set current range, & finally sanitise data
             self.autoRange()
@@ -198,7 +211,9 @@ class ToolBox:
             self.potStat.setCellStatus(True) # Cell on
             for j in range(1:3):
                 for i in range(1:20):
-                    self.potStat.readPotentialCurrent() # 20 reads
+                    lock.acquire()
+                    self.dataRead() # 20 reads
+                    lock.release()
                     sleep(0.1)
                 self.autoRange() # autorange after 20 reads
                 self.potData.clearData() # clear data, complete 3 times
@@ -213,7 +228,9 @@ class ToolBox:
                 self.state = States.Idle
             else:
                 self.potStat.vOutput(value=voltage)
-                self.potStat.readPotentialCurrent()
+                lock.acquire()
+                self.dataRead()
+                lock.release()
         elif s == States.PDInit:
             # initialise device for pulse/deposition
             self.potStat.vOutput()
@@ -222,7 +239,9 @@ class ToolBox:
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
             for j in range(1:2):
                 for i in range(1:20):
-                    self.potStat.readPotentialCurrent() # 20 reads
+                    lock.acquire()
+                    self.dataRead() # 20 reads
+                    lock.release()
                     sleep(0.1)
                 self.autoRange() # autorange based on 20 reads, then clear data
                 self.potData.clearData()
