@@ -68,16 +68,16 @@ class Deploy(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-		
+        
         for F in (SimpleMode, ExpertMode):
         
-        	frame = F(container, self)
+            frame = F(container, self)
 
-        	self.frames[F] = frame
+            self.frames[F] = frame
 
-        	frame.grid(row=0, column=0, sticky="nsew")
+            frame.grid(row=0, column=0, sticky="nsew")
 
-        	self.show_frame(SimpleMode)
+            self.show_frame(SimpleMode)
 
     def show_frame(self, cont):
 
@@ -196,7 +196,7 @@ class ExpertMode(tk.Frame):
         applyVariables= ttk.Button(self, text="Apply")
         applyVariables.grid(column=6, row =6)
         
-		def get_parameters():
+        def get_parameters():
         entry1Data = entry1.get()
         entry2Data = entry2.get()
         entry3Data = entry3.get()
