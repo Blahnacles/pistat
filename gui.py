@@ -93,7 +93,7 @@ class SimpleMode(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
         label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        label.grid(column=1, row=1)
         
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         colourLabelY.grid(column=0)
@@ -121,8 +121,8 @@ class ExpertMode(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        #label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
+        #label.grid
         
         colourLabelY = tk.Label(self, background="#326ada", width=3, height=18)
         colourLabelY.grid(column=0, rowspan=6)
