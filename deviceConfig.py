@@ -209,7 +209,7 @@ class ToolBox:
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
             self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
             self.potStat.setCellStatus(True) # Cell on
-            for j in range(1:3):
+            for j in range(3):
                 for i in range(1:20):
                     lock.acquire()
                     self.dataRead() # 20 reads
@@ -237,7 +237,7 @@ class ToolBox:
             self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
             self.potStat.setCellStatus(True) # cell on
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
-            for j in range(1:2):
+            for j in range(2):
                 for i in range(1:20):
                     lock.acquire()
                     self.dataRead() # 20 reads
