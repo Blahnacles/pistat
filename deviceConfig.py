@@ -76,15 +76,15 @@ class GraphData:
         self.rawCurrentData.clear()
         self.currentData.clear()
         self.potentialData.clear()
-    def loadData(filename):
+    def loadData(self,filename):
         # loads potential/current data from a given .csv file
         try:
             data = pandas.read_csv(filename)
             self.potentialData = data.values[:,0]
             self.currentData = data.values[:,1]
-            print("data in "+filename+" successfully loaded")
+            print("data in "+filename+" successfully loaded, first sample: "+str(data.values[1,1]))
         except Exception as e:
-            pass
+            print(e)
 
     #def idleInit(self):
     #    """
@@ -107,7 +107,7 @@ class ToolBox:
         self.potData = potData
         self.debugFlag = debugFlag
         if(debugFlag):
-            self.demo1Init()
+            self.state = States.Idle
         else:
             self.state = States.NotConnected
         #timer = QtCore.QTimer()
@@ -169,6 +169,7 @@ class ToolBox:
     def action(self,lock):
         """State machine for regular cyclic voltammetry operation. Added 06/08/2019 SBL"""
         s = self.state
+        print(s)
         if s == States.IdleInit:
             # IdleInit means a connection to the device has not been made
             if not self.connect_disconnect_usb():
@@ -204,7 +205,7 @@ class ToolBox:
             # enter idle data reading stage
             self.state = States.Idle
         elif s == States.Idle:
-            sleep(1)
+            pass
         elif s == States.CVInit:
             self.potStat.vOutput(value=-0.4) # setting the starting potential
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
@@ -249,9 +250,10 @@ class ToolBox:
             self.state = States.Measuring_PD # enter measurement state
         elif s == States.Demo1:
             lock.acquire()
-            self.potData.loadData()
+            self.potData.loadData("dummyData.csv")
             lock.release()
             self.state = States.Idle
+        return 1
         
         
 

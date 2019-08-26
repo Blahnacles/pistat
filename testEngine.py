@@ -8,7 +8,7 @@ devLock = threading.Lock()
 
 def actionThread():
     while 1:
-        time.sleep(piStat.testAction(devLock))
+        time.sleep(piStat.action(devLock))
 
 def dToggle():
     if piStat.state == dc.States.Demo1:
@@ -17,16 +17,15 @@ def dToggle():
         piStat.state = dc.States.Demo1
 
 def dummy():
-    piStat.state == dc.States.Idle
-    devLock.acquire()
-    piStat.potData.loadData("dummyData.csv")
-    devLock.release()
+    piStat.state = dc.States.Demo1
+    print(piStat.state)
 
 def getData():
     devLock.acquire()
     potentialData = piStat.potData.potentialData
     currentData = piStat.potData.currentData
     devLock.release()
+    print("data got")
     return potentialData, currentData
 
 # Create the daemon thread (exits when main thread exits)
