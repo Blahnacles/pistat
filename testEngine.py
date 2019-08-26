@@ -24,8 +24,8 @@ def getData():
     devLock.acquire()
     potentialData = piStat.potData.potentialData
     currentData = piStat.potData.currentData
-    devLock.release()
     print("data got")
+    devLock.release()
     return potentialData, currentData
 
 # Create the daemon thread (exits when main thread exits)

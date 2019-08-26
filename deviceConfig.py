@@ -76,6 +76,7 @@ class GraphData:
         self.rawCurrentData.clear()
         self.currentData.clear()
         self.potentialData.clear()
+        print("data reset!")
     def loadData(self,filename):
         # loads potential/current data from a given .csv file
         try:
@@ -205,7 +206,7 @@ class ToolBox:
             # enter idle data reading stage
             self.state = States.Idle
         elif s == States.Idle:
-            pass
+            sleep(0.1)
         elif s == States.CVInit:
             self.potStat.vOutput(value=-0.4) # setting the starting potential
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
@@ -251,6 +252,7 @@ class ToolBox:
         elif s == States.Demo1:
             lock.acquire()
             self.potData.loadData("dummyData.csv")
+            print("data read from .csv")
             lock.release()
             self.state = States.Idle
         return 1

@@ -9,14 +9,15 @@ import matplotlib.animation as animation
 from matplotlib import style
 import timeit
 import time
+import numpy as np
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
 
 f = Figure(figsize=(3,2.25), dpi = 100)
 a = f.add_subplot(111)
-xList = []
-yList = []
+global xList
+global yList
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -26,11 +27,10 @@ firstRead = timeit.default_timer()
 lastRead = firstRead
 tSum = lastRead
 ani = None
-stop = False
 
 
 def testAnimate(i):
-    global stop
+
     xList, yList = testEngine.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
@@ -43,14 +43,11 @@ def testAnimate(i):
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
-        stop = True
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
     else:
         a.plot(xList)
         a.plot(yList)
-    if stop:
-        time.sleep(5)
 
 def test2Animate():
     pList, cList = testEngine.piStat.getData()
@@ -95,11 +92,8 @@ class Deploy(tk.Tk):
     def testFunction():
         print("Testing!")
 
-def getLinearParameters():
-    #Get data from entry boxes
-    setPointx1 = int(entryX1.get())
-    setPointx2 = int(entryX2.get())
-        
+def getLinearParameters(entryX1,entryX2):
+    """Takes two points, and performs a linear regression for all points except the range between x1 & x2"""
     #Split point data into X and Y
     #x1,y1 = setPointxy1.split(',')
     #x2,y2 = setPointxy2.split(',')
@@ -110,10 +104,32 @@ def getLinearParameters():
      #   if(x == int(setPointx1))
     #        x1Index = xList[x]
      #       y1Index = yList[y]
-	
-	indexX1 = xList.index(setPointx1)
-	indexX2 = xList.index(setPointx2)
-	
+    
+    #indexX1 = xList.index(setPointx1)
+    #indexX2 = xList.index(setPointx2)
+
+    ## Getting the data again isn't ideal, this is a band-aid fix
+    ## Really don't want to make xList global
+    ## Lucky I threaded it, makes hacks like this reaaaal easy - SBL
+    xList, yList = testEngine.getData()
+    xList = xList[::-1]
+    yList = yList[::-1]
+    # for i in xList:
+    #     if i>entryX1:
+    #         indexX1 = i
+    #         print(indexX1)
+    #         print("one")
+    #     if i>entryX2:
+    #         indexX2 = i
+    #         print(indexX2)
+    #         print("two")
+    #         break
+    indexX1 = np.abs([xx-entryX1 for xx in xList]).argmin()
+    indexX2 = np.abs([xx-entryX2 for xx in xList]).argmin()
+    print(indexX1)
+    print(indexX2)
+    if indexX1>indexX2:
+        indexX1,indexX2 = indexX2,indexX1
     #crop list of data to remove peak for X
     croppedListX1 = xList[0:indexX1]
     croppedListX2 = xList[indexX2:]
@@ -128,7 +144,7 @@ def getLinearParameters():
     fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
     #fit_fn = np.poly1d(fit)
     #Plot the linear Regression
-    a.plot(croppedListXFinal, polyval(fit,croppedListXFinal), 'r-')
+    a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
         
 class SimpleMode(tk.Frame):
 
@@ -158,14 +174,15 @@ class SimpleMode(tk.Frame):
         calibrateButton.grid(column=3, row=4)
 
         # lukes new regression stuff here
-        setLinearRegressionButton = ttk.Button(self, text="Apply Linear Regression", command=getLinearParameters)
-        setLinearRegressionButton.grid(column=2, row=4)
-        
+
         entryX1 = ttk.Entry(self)
         entryX1.grid(column=2, row = 2)
           
         entryX2 = ttk.Entry(self)
         entryX2.grid(column=2, row = 3)
+        setLinearRegressionButton = ttk.Button(self, text="Apply Linear Regression", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
+        # ^ holy brackets batman!
+        setLinearRegressionButton.grid(column=2, row=4)
         
         
         
@@ -304,7 +321,7 @@ class Test1Mode(tk.Frame):
 
 
 app = Deploy()
-ani = animation.FuncAnimation(f, testAnimate, interval=1)
+ani = animation.FuncAnimation(f, testAnimate, interval=200)
 app.geometry("500x300")
 app.mainloop()
 
