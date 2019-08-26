@@ -29,7 +29,7 @@ ani = None
 
 
 def testAnimate(i):
-    xList, yList = testEngine.getData()
+    xList, yList = testEngine.piStat.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
         # Set the axes once offset has changed
@@ -40,8 +40,6 @@ def testAnimate(i):
         # Reset the offsetBin once it has been checked
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
-        a.plot(xList, yList)
-    elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
     else:
         a.plot(xList)
@@ -70,16 +68,16 @@ class Deploy(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        
+		
         for F in (SimpleMode, ExpertMode):
         
-            frame = F(container, self)
+        	frame = F(container, self)
 
-            self.frames[F] = frame
+        	self.frames[F] = frame
 
-            frame.grid(row=0, column=0, sticky="nsew")
+        	frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(SimpleMode)
+        	self.show_frame(SimpleMode)
 
     def show_frame(self, cont):
 
@@ -107,16 +105,15 @@ class SimpleMode(tk.Frame):
         canvas.draw()
         canvas.get_tk_widget().grid(row=2, column=1)
 
-        #toolbar = NavigationToolbar2Tk(canvas, self)
-        #toolbar.update()
-        #canvas._tkcanvas.grid(row=2, column=1)
+        toolbar = NavigationToolbar2Tk(canvas, self)
+        toolbar.update()
+        canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        calibrateButton = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
+        button2.grid(column=3, row=4)
         buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
         buttonExpertMode.grid(column=3, row=1)
-        calibrateButton = ttk.Button(self, text="Toggle Demo", command=lambda: testEngine.dummy())
-        calibrateButton.grid(column=3, row=4)
-        
         
 
 
@@ -199,17 +196,17 @@ class ExpertMode(tk.Frame):
         applyVariables= ttk.Button(self, text="Apply")
         applyVariables.grid(column=6, row =6)
         
-        def get_parameters():
-            entry1Data = entry1.get()
-            entry2Data = entry2.get()
-            entry3Data = entry3.get()
-            entry4Data = entry4.get()
-            entry5Data = entry5.get()
-            entry6Data = entry6.get()
-            entry7Data = entry7.get()
-            entry8Data = entry8.get()
-            entry9Data = entry9.get()
-            entry10Data = entry10.get()
+		def get_parameters():
+        entry1Data = entry1.get()
+        entry2Data = entry2.get()
+        entry3Data = entry3.get()
+        entry4Data = entry4.get()
+        entry5Data = entry5.get()
+        entry6Data = entry6.get()
+        entry7Data = entry7.get()
+        entry8Data = entry8.get()
+        entry9Data = entry9.get()
+        entry10Data = entry10.get()
 
 class UploadData(tk.Frame):
 
