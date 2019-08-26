@@ -29,7 +29,7 @@ ani = None
 
 
 def testAnimate(i):
-    xList, yList = testEngine.piStat.getData()
+    xList, yList = testEngine.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
         # Set the axes once offset has changed
@@ -40,6 +40,8 @@ def testAnimate(i):
         # Reset the offsetBin once it has been checked
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
+        a.plot(xList, yList)
+    elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
     else:
         a.plot(xList)
@@ -77,7 +79,7 @@ class Deploy(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-            self.show_frame(SimpleMode)
+        self.show_frame(SimpleMode)
 
     def show_frame(self, cont):
 
@@ -87,6 +89,45 @@ class Deploy(tk.Tk):
     @staticmethod
     def testFunction():
         print("Testing!")
+
+def getLinearParameters():
+    #Get data from entry boxes
+    setPointxy1 = entryXY1.get()
+    setPointxy2 = entryXY2.get()
+        
+    #Split point data into X and Y
+    x1,y1 = setPointxy1.split(',')
+    x2,y2 = setPointxy2.split(',')
+
+    #create array points from data and put into array
+    x = [int(x1), int(x2)]
+    y = [int(y1), int(y2)]
+    #find index of user data points
+    # for x, y in zip(xList, yList):
+    #     if(x == int(x1) and y == int(y1)
+    #         x1Index = xList[x]
+    #         y1Index = yList[y]
+
+            # for x, y in zip(xList, yList):
+            #     if(x == int(x2) and y == int(y2)
+            #         x2Index = xList.index(x)
+            #         y2Index = yList.index(y)
+                   
+    #crop list of data to remove peak for X
+    croppedListX1 = xList[0:x1Index]
+    croppedListX2 = xList[x2Index:]
+    #Append lists for X
+    croppedListXfinal = croppedListX1 + croppedListX2
+    #crop list of data to remove peak for Y
+    croppedListY1 = yList[0:y1Index]
+    croppedListY2 = yList[y2Index:]
+    #Append data for Y
+    croppedListYFinal = croppedListY1 + croppedListY2
+    #Calculate linear regression
+    fit = np.polyfit(x, y, 1)
+    #fit_fn = np.poly1d(fit)
+    #Plot the linear Regression
+    a.plot(x, polyval(fit,x), 'r-')
         
 class SimpleMode(tk.Frame):
 
@@ -105,15 +146,30 @@ class SimpleMode(tk.Frame):
         canvas.draw()
         canvas.get_tk_widget().grid(row=2, column=1)
 
-        toolbar = NavigationToolbar2Tk(canvas, self)
-        toolbar.update()
-        canvas._tkcanvas.grid(row=2, column=1)
+        #toolbar = NavigationToolbar2Tk(canvas, self)
+        #toolbar.update()
+        #canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        calibrateButton = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
-        button2.grid(column=3, row=4)
         buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
         buttonExpertMode.grid(column=3, row=1)
+        calibrateButton = ttk.Button(self, text="Toggle Demo", command=lambda: testEngine.dummy())
+        calibrateButton.grid(column=3, row=4)
+
+
+        # lukes new regression stuff here
+        setLinearRegressionButton = ttk.Button(self, text="Apply Linear Regression", command=getLinearParameters)
+        setLinearRegressionButton.grid(column=2, row=4)
+        
+        entryXY1 = ttk.Entry(self)
+        entryXY1.grid(column=3, row = 2)
+          
+        entryXY2 = ttk.Entry(self)
+        entryXY2.grid(column=3, row = 3)
+        
+        
+        
+        
         
 
 
