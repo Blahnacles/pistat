@@ -110,7 +110,7 @@ class SimpleMode(tk.Frame):
         canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        calibrateButton = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
+        calibrateButton = ttk.Button(self, text="Toggle Demo", command=testEngine.dummy())
         button2.grid(column=3, row=4)
         buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
         buttonExpertMode.grid(column=3, row=1)
