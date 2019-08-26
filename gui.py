@@ -97,42 +97,38 @@ class Deploy(tk.Tk):
 
 def getLinearParameters():
     #Get data from entry boxes
-    setPointxy1 = entryXY1.get()
-    setPointxy2 = entryXY2.get()
+    setPointx1 = int(entryX1.get())
+    setPointx2 = int(entryX2.get())
         
     #Split point data into X and Y
-    x1,y1 = setPointxy1.split(',')
-    x2,y2 = setPointxy2.split(',')
+    #x1,y1 = setPointxy1.split(',')
+    #x2,y2 = setPointxy2.split(',')
 
     #create array points from data and put into array
-    x = [int(x1), int(x2)]
-    y = [int(y1), int(y2)]
     #find index of user data points
-    # for x, y in zip(xList, yList):
-    #     if(x == int(x1) and y == int(y1)
-    #         x1Index = xList[x]
-    #         y1Index = yList[y]
-
-            # for x, y in zip(xList, yList):
-            #     if(x == int(x2) and y == int(y2)
-            #         x2Index = xList.index(x)
-            #         y2Index = yList.index(y)
-                   
+    #for x, y in zip(xList, yList):
+     #   if(x == int(setPointx1))
+    #        x1Index = xList[x]
+     #       y1Index = yList[y]
+	
+	indexX1 = xList.index(setPointx1)
+	indexX2 = xList.index(setPointx2)
+	
     #crop list of data to remove peak for X
-    croppedListX1 = xList[0:x1Index]
-    croppedListX2 = xList[x2Index:]
+    croppedListX1 = xList[0:indexX1]
+    croppedListX2 = xList[indexX2:]
     #Append lists for X
-    croppedListXfinal = croppedListX1 + croppedListX2
+    croppedListXFinal = croppedListX1 + croppedListX2
     #crop list of data to remove peak for Y
-    croppedListY1 = yList[0:y1Index]
-    croppedListY2 = yList[y2Index:]
+    croppedListY1 = yList[0:indexX1]
+    croppedListY2 = yList[indexX2:]
     #Append data for Y
     croppedListYFinal = croppedListY1 + croppedListY2
     #Calculate linear regression
-    fit = np.polyfit(x, y, 1)
+    fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
     #fit_fn = np.poly1d(fit)
     #Plot the linear Regression
-    a.plot(x, polyval(fit,x), 'r-')
+    a.plot(croppedListXFinal, polyval(fit,croppedListXFinal), 'r-')
         
 class SimpleMode(tk.Frame):
 
@@ -161,16 +157,15 @@ class SimpleMode(tk.Frame):
         calibrateButton = ttk.Button(self, text="Toggle Demo", command=lambda: testEngine.dummy())
         calibrateButton.grid(column=3, row=4)
 
-
         # lukes new regression stuff here
         setLinearRegressionButton = ttk.Button(self, text="Apply Linear Regression", command=getLinearParameters)
         setLinearRegressionButton.grid(column=2, row=4)
         
-        entryXY1 = ttk.Entry(self)
-        entryXY1.grid(column=3, row = 2)
+        entryX1 = ttk.Entry(self)
+        entryX1.grid(column=2, row = 2)
           
-        entryXY2 = ttk.Entry(self)
-        entryXY2.grid(column=3, row = 3)
+        entryX2 = ttk.Entry(self)
+        entryX2.grid(column=2, row = 3)
         
         
         
