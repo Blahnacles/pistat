@@ -197,16 +197,16 @@ class ExpertMode(tk.Frame):
         applyVariables.grid(column=6, row =6)
         
         def get_parameters():
-        entry1Data = entry1.get()
-        entry2Data = entry2.get()
-        entry3Data = entry3.get()
-        entry4Data = entry4.get()
-        entry5Data = entry5.get()
-        entry6Data = entry6.get()
-        entry7Data = entry7.get()
-        entry8Data = entry8.get()
-        entry9Data = entry9.get()
-        entry10Data = entry10.get()
+            entry1Data = entry1.get()
+            entry2Data = entry2.get()
+            entry3Data = entry3.get()
+            entry4Data = entry4.get()
+            entry5Data = entry5.get()
+            entry6Data = entry6.get()
+            entry7Data = entry7.get()
+            entry8Data = entry8.get()
+            entry9Data = entry9.get()
+            entry10Data = entry10.get()
 
 class UploadData(tk.Frame):
 
