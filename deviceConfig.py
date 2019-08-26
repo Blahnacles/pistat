@@ -82,6 +82,7 @@ class GraphData:
             data = pandas.read_csv(filename)
             self.potentialData = data.values[:,0]
             self.currentData = data.values[:,1]
+            print("data in "+filename+" successfully loaded")
         except Exception as e:
             pass
 
@@ -246,6 +247,11 @@ class ToolBox:
                 self.autoRange() # autorange based on 20 reads, then clear data
                 self.potData.clearData()
             self.state = States.Measuring_PD # enter measurement state
+        elif s == States.Demo1:
+            lock.acquire()
+            self.potData.loadData()
+            lock.release()
+            self.state = States.Idle
         
         
 

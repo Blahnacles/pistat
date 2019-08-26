@@ -103,7 +103,7 @@ class SimpleMode(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dToggle)
+        button2 = ttk.Button(self, text="Toggle Demo", command=testEngine.dummy())
         button2.pack()
         button1 = ttk.Button(self, text="Calibrate and go")
         button1.pack()

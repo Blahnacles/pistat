@@ -16,6 +16,12 @@ def dToggle():
     elif piStat.state == dc.States.Demo2:
         piStat.state = dc.States.Demo1
 
+def dummy():
+    piStat.state == dc.States.Idle
+    devLock.acquire()
+    piStat.potData.loadData()
+    devLock.release()
+
 def getData():
     devLock.acquire()
     potentialData = piStat.potData.potentialData
