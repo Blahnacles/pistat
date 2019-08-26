@@ -26,9 +26,11 @@ firstRead = timeit.default_timer()
 lastRead = firstRead
 tSum = lastRead
 ani = None
+stop = False
 
 
 def testAnimate(i):
+    global stop
     xList, yList = testEngine.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
@@ -41,11 +43,14 @@ def testAnimate(i):
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
+        stop = True
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
     else:
         a.plot(xList)
         a.plot(yList)
+    if stop:
+        time.sleep(5)
 
 def test2Animate():
     pList, cList = testEngine.piStat.getData()
