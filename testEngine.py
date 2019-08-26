@@ -19,7 +19,7 @@ def dToggle():
 def dummy():
     piStat.state == dc.States.Idle
     devLock.acquire()
-    piStat.potData.loadData()
+    piStat.potData.loadData("dummyData.csv")
     devLock.release()
 
 def getData():
