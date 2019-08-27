@@ -22,7 +22,10 @@ global yList
 global linearRegFlag
 linearRegFlag=False
 global croppedListXFinal
+croppedListXFinal = None
 global croppedListYFinal
+croppedListYFinal = None
+global xList, yList
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -35,7 +38,8 @@ ani = None
 
 
 def testAnimate(i):
-
+    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
+    print(str(croppedListXFinal is not None))
     xList, yList = testEngine.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
@@ -48,11 +52,12 @@ def testAnimate(i):
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
-    elif testEngine.piStat.state==testEngine.dc.States.Idle:
-        a.plot(xList, yList)
     elif linearRegFlag and croppedListXFinal is not None:
         fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
+        a.plot(xList, yList)
         a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+    elif testEngine.piStat.state==testEngine.dc.States.Idle:
+        a.plot(xList, yList)
     else:
         a.plot(xList)
         a.plot(yList)
@@ -102,6 +107,7 @@ class Deploy(tk.Tk):
 
 def getLinearParameters(entryX1,entryX2):
     """Takes two points, and performs a linear regression for all points except the range between x1 & x2"""
+    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
     #Split point data into X and Y
     #x1,y1 = setPointxy1.split(',')
     #x2,y2 = setPointxy2.split(',')
@@ -116,12 +122,10 @@ def getLinearParameters(entryX1,entryX2):
     #indexX1 = xList.index(setPointx1)
     #indexX2 = xList.index(setPointx2)
 
-    ## Getting the data again isn't ideal, this is a band-aid fix
-    ## Really don't want to make xList global
-    ## Lucky I threaded it, makes hacks like this reaaaal easy - SBL
-    xList, yList = testEngine.getData()
-    xList = xList[::-1]
-    yList = yList[::-1]
+    xxList = xList[:]
+    yyList = yList[:]
+    xxList = xxList[::-1]
+    yyList = yyList[::-1]
     # for i in xList:
     #     if i>entryX1:
     #         indexX1 = i
@@ -132,22 +136,22 @@ def getLinearParameters(entryX1,entryX2):
     #         print(indexX2)
     #         print("two")
     #         break
-    indexX1 = np.abs([xx-entryX1 for xx in xList]).argmin()
-    indexX2 = np.abs([xx-entryX2 for xx in xList]).argmin()
-    print(indexX1)
-    print(indexX2)
+    indexX1 = np.abs([xx-entryX1 for xx in xxList]).argmin()
+    indexX2 = np.abs([xx-entryX2 for xx in xxList]).argmin()
+    xxList = xList[:]
     if indexX1>indexX2:
         indexX1,indexX2 = indexX2,indexX1
     #crop list of data to remove peak for X
-    croppedListX1 = xList[0:indexX1]
-    croppedListX2 = xList[indexX2:]
+    croppedListX1 = xxList[0:indexX1]
+    croppedListX2 = xxList[indexX2:]
     #Append lists for X
-    croppedListXFinal = croppedListX1 + croppedListX2
+    croppedListXFinal = np.concatenate((croppedListX1, croppedListX2))
+    print(str(type(croppedListX1)))
     #crop list of data to remove peak for Y
-    croppedListY1 = yList[0:indexX1]
-    croppedListY2 = yList[indexX2:]
+    croppedListY1 = yyList[0:indexX1]
+    croppedListY2 = yyList[indexX2:]
     #Append data for Y
-    croppedListYFinal = croppedListY1 + croppedListY2
+    croppedListYFinal = np.concatenate((croppedListY1, croppedListY2))
     #Calculate linear regression
     #fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
     #fit_fn = np.poly1d(fit)
