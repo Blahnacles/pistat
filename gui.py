@@ -10,6 +10,7 @@ from matplotlib import style
 import timeit
 import time
 import numpy as np
+#from PIL import Image, ImageTk
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
@@ -19,7 +20,7 @@ a = f.add_subplot(111)
 global xList
 global yList
 global linearRegFlag
-linearRegFlag=false
+linearRegFlag=False
 global croppedListXFinal
 global croppedListYFinal
 
@@ -33,7 +34,7 @@ tSum = lastRead
 ani = None
 
 
-def testAnimate(i, croppedListXFinal, croppedListYFinal):
+def testAnimate(i):
 
     xList, yList = testEngine.getData()
     a.clear()
@@ -49,9 +50,9 @@ def testAnimate(i, croppedListXFinal, croppedListYFinal):
         a.plot(xList, yList)
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
-	elif linearRegFlag and croppedListXFinal is not None:
-		fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
-		a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+    elif linearRegFlag and croppedListXFinal is not None:
+        fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
+        a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
     else:
         a.plot(xList)
         a.plot(yList)
@@ -152,7 +153,7 @@ def getLinearParameters(entryX1,entryX2):
     #fit_fn = np.poly1d(fit)
     #Plot the linear Regression
     #a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
-	linearRegFlag=true
+    linearRegFlag=True
         
 class SimpleMode(tk.Frame):
 
@@ -160,42 +161,57 @@ class SimpleMode(tk.Frame):
         tk.Frame.__init__(self,parent)
         
         #tk.frame.config(bg="white")
-		 
+        
+        #latrobeIcon = Image.open("latrobeicon.jpg")
+        #latrobeShowImage = ImageTk.PhotoImage(latrobeIcon)
+
+        #latrobeLabel = tk.label(self, image=latrobeShowImage)
+        #latrobeLabel.place(x=0, y=0)
+        
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
-        colourLabelY.grid(column=0, rowspan=4)
-		
-		#label = tk.Label(self, text="0000", font=LARGE_FONT)
-		#label.grid(column=1, row=1)
-		
-		label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        label.grid(column=1, row=1)
-		
-        #colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
-        #colourLabelX.grid(column=1, row=4)
-		
+        #colourLabelY.grid(column=0, rowspan=4)
+        colourLabelY.place(x=0, y=0, height=300, width=50 )
+
+        #label = tk.Label(self, text="0000", font=LARGE_FONT)
+        #label.grid(column=1, row=1)
+
+        label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
+        #label.grid(column=1, row=1)
+        label.place(x = 150, y = 5)
+        
+        colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
+        colourLabelX.place(x=0, y=270, height=40, width=400)
+        
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
-        canvas.get_tk_widget().grid(column=1, row=2)
-
+        #canvas.get_tk_widget().grid(column=1, row=2)
+        canvas.get_tk_widget().place(y=40, x=60)
         #toolbar = NavigationToolbar2Tk(canvas, self)
         #toolbar.update()
         #canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-		
-		entryX1 = ttk.Entry(self)
-        entryX1.grid(column=3, row = 3, width=4)
-          
+        seperationLabel = tk.Label(self, background="black")
+        seperationLabel.place(x=395, y=0, height=300, width=5)
+        x1Label = tk.Label(self, text="X1 Value")
+        x1Label.place(x=415, y=60)
+        x2Label = tk.Label(self, text="X2 Value")
+        x2Label.place(x=415, y=100)
+        entryX1 = ttk.Entry(self)
+        #entryX1.grid(column=3, row = 2)
+        entryX1.place(x=400, y=80)
         entryX2 = ttk.Entry(self)
-        entryX2.grid(column=3, row = 4, width=4)
-		
+        #entryX2.grid(column=2, row = 2, pady=5)
+        entryX2.place(x=400, y=120)
         setLinearRegressionButton = ttk.Button(self, text="Line Reg", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
         # ^ holy brackets batman!
-        setLinearRegressionButton.grid(column=3, row=5)
-
-        buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
-        buttonExpertMode.grid(column=3, row=1)
-        calibrateButton = ttk.Button(self, text="Toggle Demo", command=lambda: testEngine.dummy())
-        calibrateButton.grid(column=3, row=6)
+        #setLinearRegressionButton.grid(column=3, row=5)
+        setLinearRegressionButton.place(x=410, y=160)
+        buttonExpertMode = ttk.Button(self, text="Expert", command=lambda: controller.show_frame(ExpertMode))
+        #buttonExpertMode.grid(column=3, row=1)
+        buttonExpertMode.place(x=0, y=272, width = 60)
+        calibrateButton = ttk.Button(self, text="Load Data", command=lambda: testEngine.dummy())
+        #calibrateButton.grid(column=3, row=6)
+        calibrateButton.place(x=410, y=200)
 
         # lukes new regression stuff here
 
@@ -339,7 +355,8 @@ class Test1Mode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=200)
-app.geometry("500x300")
+#app.geometry("500x300")
+app.attributes("-zoomed", True)
 app.mainloop()
 
 
