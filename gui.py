@@ -18,6 +18,9 @@ f = Figure(figsize=(3,2.25), dpi = 100)
 a = f.add_subplot(111)
 global xList
 global yList
+global linearRegFlag = false
+global croppedListXFinal
+global croppedListYFinal
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -45,6 +48,9 @@ def testAnimate(i):
         a.plot(xList, yList)
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
+	elif linearRegFlag and croppedListXFinal is not None
+		fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
+		a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
     else:
         a.plot(xList)
         a.plot(yList)
@@ -141,10 +147,10 @@ def getLinearParameters(entryX1,entryX2):
     #Append data for Y
     croppedListYFinal = croppedListY1 + croppedListY2
     #Calculate linear regression
-    fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
+    #fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
     #fit_fn = np.poly1d(fit)
     #Plot the linear Regression
-    a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+    #a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
         
 class SimpleMode(tk.Frame):
 
