@@ -15,7 +15,7 @@ LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
 
-f = Figure(figsize=(3,2.25), dpi = 100)
+f = Figure(figsize=(4.3,4), dpi = 100, tight_layout=True)
 a = f.add_subplot(111)
 global xList
 global yList
@@ -52,12 +52,23 @@ def testAnimate(i):
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
+        a.axes.set_yscale("log")
+        a.set_xlabel("Potential")
+        a.set_ylabel("Current")
     elif linearRegFlag and croppedListXFinal is not None:
         fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
         a.plot(xList, yList)
         a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+        a.axes.set_yscale("log")
+        a.set_xlabel("Potential")
+        a.set_ylabel("Current")
+        a.set_title("Sample data & regression line")
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
+        a.axes.set_yscale("log")
+        a.set_xlabel("Potential")
+        a.set_ylabel("Current")
+        a.set_title("Sample data")
     else:
         a.plot(xList)
         a.plot(yList)
@@ -174,17 +185,17 @@ class SimpleMode(tk.Frame):
         
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         #colourLabelY.grid(column=0, rowspan=4)
-        colourLabelY.place(x=0, y=0, height=300, width=50 )
+        colourLabelY.place(x=0, y=0, height=480, width=50 )
 
         #label = tk.Label(self, text="0000", font=LARGE_FONT)
         #label.grid(column=1, row=1)
 
-        label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
+        label = tk.Label(self, text="PiStat", font=LARGE_FONT)
         #label.grid(column=1, row=1)
-        label.place(x = 150, y = 5)
+        label.place(x = 60, y = 5)
         
         colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
-        colourLabelX.place(x=0, y=270, height=40, width=400)
+        colourLabelX.place(x=0, y=440, height=40, width=800)
         
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
@@ -195,27 +206,27 @@ class SimpleMode(tk.Frame):
         #canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         seperationLabel = tk.Label(self, background="black")
-        seperationLabel.place(x=395, y=0, height=310, width=5)
+        seperationLabel.place(x=500, y=0, height=480, width=5)
         x1Label = tk.Label(self, text="X1 Value")
-        x1Label.place(x=415, y=60)
+        x1Label.place(x=515, y=60)
         x2Label = tk.Label(self, text="X2 Value")
-        x2Label.place(x=415, y=100)
+        x2Label.place(x=515, y=100)
         entryX1 = ttk.Entry(self)
         #entryX1.grid(column=3, row = 2)
-        entryX1.place(x=400, y=80)
+        entryX1.place(x=510, y=80)
         entryX2 = ttk.Entry(self)
         #entryX2.grid(column=2, row = 2, pady=5)
-        entryX2.place(x=400, y=120)
+        entryX2.place(x=510, y=120)
         setLinearRegressionButton = ttk.Button(self, text="Line Reg", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
         # ^ holy brackets batman!
         #setLinearRegressionButton.grid(column=3, row=5)
-        setLinearRegressionButton.place(x=410, y=160)
+        setLinearRegressionButton.place(x=510, y=160)
         buttonExpertMode = ttk.Button(self, text="Expert", command=lambda: controller.show_frame(ExpertMode))
         #buttonExpertMode.grid(column=3, row=1)
-        buttonExpertMode.place(x=0, y=272, width = 60)
+        buttonExpertMode.place(x=50, y=445, width = 60)
         calibrateButton = ttk.Button(self, text="Load Data", command=lambda: testEngine.dummy())
         #calibrateButton.grid(column=3, row=6)
-        calibrateButton.place(x=410, y=200)
+        calibrateButton.place(x=510, y=200)
 
         # lukes new regression stuff here
 
@@ -360,7 +371,7 @@ class Test1Mode(tk.Frame):
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=200)
 app.geometry("800x480")
-app.attributes("-zoomed", True)
+#app.attributes("-zoomed", True)
 app.mainloop()
 
 
