@@ -195,7 +195,7 @@ class SimpleMode(tk.Frame):
         #canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         seperationLabel = tk.Label(self, background="black")
-        seperationLabel.place(x=395, y=0, height=300, width=5)
+        seperationLabel.place(x=395, y=0, height=310, width=5)
         x1Label = tk.Label(self, text="X1 Value")
         x1Label.place(x=415, y=60)
         x2Label = tk.Label(self, text="X2 Value")
@@ -359,7 +359,7 @@ class Test1Mode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=200)
-#app.geometry("500x300")
+app.geometry("800x480")
 app.attributes("-zoomed", True)
 app.mainloop()
 
