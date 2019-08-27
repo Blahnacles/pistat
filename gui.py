@@ -18,7 +18,8 @@ f = Figure(figsize=(3,2.25), dpi = 100)
 a = f.add_subplot(111)
 global xList
 global yList
-global linearRegFlag = false
+global linearRegFlag
+linearRegFlag=false
 global croppedListXFinal
 global croppedListYFinal
 
@@ -32,7 +33,7 @@ tSum = lastRead
 ani = None
 
 
-def testAnimate(i):
+def testAnimate(i, croppedListXFinal, croppedListYFinal):
 
     xList, yList = testEngine.getData()
     a.clear()
@@ -48,7 +49,7 @@ def testAnimate(i):
         a.plot(xList, yList)
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
-	elif linearRegFlag and croppedListXFinal is not None
+	elif linearRegFlag and croppedListXFinal is not None:
 		fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
 		a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
     else:
@@ -158,10 +159,13 @@ class SimpleMode(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
         
-        tk.frame.config(bg="white")
+        #tk.frame.config(bg="white")
 		 
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
-        colourLabelY.grid(column=0)
+        colourLabelY.grid(column=0, rowspan=4)
+		
+		#label = tk.Label(self, text="0000", font=LARGE_FONT)
+		#label.grid(column=1, row=1)
 		
 		label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
         label.grid(column=1, row=1)
@@ -179,19 +183,19 @@ class SimpleMode(tk.Frame):
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 		
 		entryX1 = ttk.Entry(self)
-        entryX1.grid(column=2, row = 4)
+        entryX1.grid(column=3, row = 3, width=4)
           
         entryX2 = ttk.Entry(self)
-        entryX2.grid(column=2, row = 4)
+        entryX2.grid(column=3, row = 4, width=4)
 		
         setLinearRegressionButton = ttk.Button(self, text="Line Reg", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
         # ^ holy brackets batman!
-        setLinearRegressionButton.grid(column=3, row=3)
+        setLinearRegressionButton.grid(column=3, row=5)
 
         buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
         buttonExpertMode.grid(column=3, row=1)
         calibrateButton = ttk.Button(self, text="Toggle Demo", command=lambda: testEngine.dummy())
-        calibrateButton.grid(column=3, row=4)
+        calibrateButton.grid(column=3, row=6)
 
         # lukes new regression stuff here
 
