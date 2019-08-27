@@ -151,28 +151,42 @@ def getLinearParameters(entryX1,entryX2):
     #fit_fn = np.poly1d(fit)
     #Plot the linear Regression
     #a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+	linearRegFlag=true
         
 class SimpleMode(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
-        label.grid(column=1, row=1)
         
+        tk.frame.config(bg="white")
+		 
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         colourLabelY.grid(column=0)
-
-        colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
-        colourLabelX.grid(column=1, row=4)
-
+		
+		label = tk.Label(self, text="PotentioStat", font=LARGE_FONT)
+        label.grid(column=1, row=1)
+		
+        #colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
+        #colourLabelX.grid(column=1, row=4)
+		
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=2, column=1)
+        canvas.get_tk_widget().grid(column=1, row=2)
 
         #toolbar = NavigationToolbar2Tk(canvas, self)
         #toolbar.update()
         #canvas._tkcanvas.grid(row=2, column=1)
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+		
+		entryX1 = ttk.Entry(self)
+        entryX1.grid(column=2, row = 4)
+          
+        entryX2 = ttk.Entry(self)
+        entryX2.grid(column=2, row = 4)
+		
+        setLinearRegressionButton = ttk.Button(self, text="Line Reg", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
+        # ^ holy brackets batman!
+        setLinearRegressionButton.grid(column=3, row=3)
 
         buttonExpertMode = ttk.Button(self, text="Expert Mode", command=lambda: controller.show_frame(ExpertMode))
         buttonExpertMode.grid(column=3, row=1)
@@ -181,14 +195,7 @@ class SimpleMode(tk.Frame):
 
         # lukes new regression stuff here
 
-        entryX1 = ttk.Entry(self)
-        entryX1.grid(column=2, row = 2)
-          
-        entryX2 = ttk.Entry(self)
-        entryX2.grid(column=2, row = 3)
-        setLinearRegressionButton = ttk.Button(self, text="Apply Linear Regression", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
-        # ^ holy brackets batman!
-        setLinearRegressionButton.grid(column=2, row=4)
+        
         
         
         
