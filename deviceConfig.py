@@ -4,7 +4,7 @@ import collections
 import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
-
+import sqlite3
 class States:
     """
     Named list of states to be used as a simple state machine.
@@ -36,17 +36,35 @@ class GraphData:
         # Fuck these two lines, has to be a better way - SBL
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
-	
-	def exportRawPotentialDataToFile( self):
-		with open('rawPotentialData.csv', 'w') as outfile:
-			for row in list( self.rawPotentialData):
-				outfile.write( '%f\n' % row )
-				
-	def exportRawCurrentDataToFile( self):
-		with open('rawCurrentData.csv', 'w') as outfile:
-			for row in list( self.rawCurrentlData):
-				outfile.write( '%f\n' % row )
-	
+
+    def exportToSQLITE(self):
+        conn = sqlite3.connect('piStat.db')
+        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES (-1, 0.5, 0.123)'
+
+        for i in range( len( list(self.rawPotentialData) )):
+            c1 = list(self.rawPotentialData)[i]
+            c2 = list(self.rawCurrentData)[i]
+            sqlStatement += ',(%d, %f, %f)' % ( i, c1, c2)
+
+        sqlStatement += ';'
+
+        c = conn.cursor()
+        c.execute( sqlStatement )
+
+        conn.commit()
+
+        conn.close()
+
+    def exportRawPotentialDataToFile( self):
+        with open('rawPotentialData.csv', 'w') as outfile:
+            for row in list( self.rawPotentialData):
+                outfile.write( '%f\n' % row )
+
+    def exportRawCurrentDataToFile( self):
+        with open('rawCurrentData.csv', 'w') as outfile:
+            for row in list( self.rawCurrentlData):
+                outfile.write( '%f\n' % row )
+
     #def idleInit(self):
     #    """
     #    Prep the graph, initialisation goes here
@@ -54,7 +72,9 @@ class GraphData:
     #    """
     #    self.state = States.Idle
     
-    
+if __name__ == '__main__':
+    dc = GraphData()
+    dc.exportToSQLITE()
 
 
     
@@ -63,7 +83,8 @@ class ToolBox:
     ### Toolbox - a compilation of PiStat generic functions
     ### Ported SBL 08/05/2019
 
-    def __init__(self, potStat, potData, debugFlag=False): """ The constructor, creates on object for you. """
+    def __init__(self, potStat, potData, debugFlag=False):
+        """ The constructor, creates on object for you. """
         self.potStat = potStat
         self.potData = potData
         self.debugFlag = debugFlag
@@ -74,7 +95,8 @@ class ToolBox:
         #timer = QtCore.QTimer()
         #timer.timeout.connect(self.action) # call this function
         #timer.start(p) # every p ms
-    def connect_disconnect_usb(self): """ Connects and disconnects the device itself. """
+    def connect_disconnect_usb(self):
+        """ Connects and disconnects the device itself. """
         """Toggle device between connected & disconnected
         """
         # Refactored SBL 08/05/2019
@@ -104,16 +126,19 @@ class ToolBox:
                     print("value error")
                     pass # In case device is not yet calibrated
 
-    def dataRead(self): """ This function helps read the Current and Potential data. """
+    def dataRead(self):
+        """ This function helps read the Current and Potential data. """
         potential, current = self.potStat.readPotentialCurrent()
         self.potData.rawPotentialData.append(potential)
         self.potData.rawCurrentData.append(current)
 
-    def demo1Init(self): """ Puts the system into initialization mode. """
+    def demo1Init(self):
+        """ Puts the system into initialization mode. """
         """Initialises the system for non-device demo data"""
         self.state = States.Demo1
 
-    def action(self): """ The process takes place. """
+    def action(self):
+        """ The process takes place. """
         # Why doesnt this language implement switch-case????    
         s = self.state
         if s == States.Demo1:
@@ -136,7 +161,8 @@ class ToolBox:
             pass
 
 
-    def demo1DataRead(self): """Adds 1 pseudo-random datapoint when called"""
+    def demo1DataRead(self):
+        """Adds 1 pseudo-random datapoint when called"""
         #potential = 1e-100*random.randint(0,100)
         if self.potData.rawPotentialData[-1] <=200:
             current = self.potData.rawCurrentData[-1] + 1e-2*random.randint(-10,10)
@@ -148,7 +174,8 @@ class ToolBox:
         else:
             self.state = States.NotConnected
 
-    def getData(self): """ Calls the raw Current vs Potential data and Returns plottable data"""
+    def getData(self):
+        """ Calls the raw Current vs Potential data and Returns plottable data"""
         return self.potData.rawPotentialData, self.potData.rawCurrentData
 
         
@@ -156,8 +183,10 @@ class ToolBox:
 
 
 
-class UsbStat: """Contains PotentioStat configuration settings"""
-    def __init__(self): """Initialise the system variables"""
+class UsbStat:
+    """Contains PotentioStat configuration settings"""
+    def __init__(self):
+        """Initialise the system variables"""
         self.dev = None # usb device object for the pStat
         self.vid = "0xa0a0"
         self.pid = "0x0002"
@@ -174,7 +203,9 @@ class UsbStat: """Contains PotentioStat configuration settings"""
     #######################################
     ######## Calibration functions ########
     #######################################
-    def get_dac_settings(self): """Retrieve DAC calibration values from the device's flash memory. Then, retrieve dac offset values from the device's flash memory. Adapted and combined from get_dac_calibration(), get_offset() and get_shunt_calibration()"""
+    def get_dac_settings(self):
+
+        """Retrieve DAC calibration values from the device's flash memory. Then, retrieve dac offset values from the device's flash memory. Adapted and combined from get_dac_calibration(), get_offset() and get_shunt_calibration()"""
 
         # Reading settings from device
         if self.dev is not None:
@@ -191,7 +222,8 @@ class UsbStat: """Contains PotentioStat configuration settings"""
             self.current_offset = cOffest
             self.shunt_calibration = shunt_calibration
     
-    def dac_calibrate(self): """Activate the automatic DAC1220 calibration function and retrieve the results."""
+    def dac_calibrate(self):
+        """Activate the automatic DAC1220 calibration function and retrieve the results."""
         self.send_command(b'DACCAL', b'OK')
         self.get_dac_settings()
         # realistically only need dac_offset & dac_gain from the above
@@ -200,7 +232,8 @@ class UsbStat: """Contains PotentioStat configuration settings"""
     ########################################
     ######## Input/Output functions ########
     ########################################
-    def send_command(self, command_string, expected_response): """Send a command string to the USB device and check the response, Returns True if command was properly received, returns False if not connected or command rejected by device."""
+    def send_command(self, command_string, expected_response):
+        """Send a command string to the USB device and check the response, Returns True if command was properly received, returns False if not connected or command rejected by device."""
         if self.dev is not None:
             self.dev.write(0x01, command_string) # 0x01 = write address of EP1
             response = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
@@ -239,7 +272,8 @@ class UsbStat: """Contains PotentioStat configuration settings"""
             output
         return output[0], output[1]
 
-    def set_cell_status(self, cell_on_boolean): """Switch the cell connection (True = cell on, False = cell off)."""
+    def set_cell_status(self, cell_on_boolean):
+        """Switch the cell connection (True = cell on, False = cell off)."""
         if cell_on_boolean:
             self.send_command(b'CELL ON', b'OK')
         else:
