@@ -36,7 +36,17 @@ class GraphData:
         # Fuck these two lines, has to be a better way - SBL
         self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
         self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
-
+	
+	def exportRawPotentialDataToFile( self):
+		with open('rawPotentialData.csv', 'w') as outfile:
+			for row in list( self.rawPotentialData):
+				outfile.write( '%f\n' % row )
+				
+	def exportRawCurrentDataToFile( self):
+		with open('rawCurrentData.csv', 'w') as outfile:
+			for row in list( self.rawCurrentlData):
+				outfile.write( '%f\n' % row )
+	
     #def idleInit(self):
     #    """
     #    Prep the graph, initialisation goes here
