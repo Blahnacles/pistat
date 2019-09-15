@@ -12,19 +12,28 @@ def actionThread():
 
 def dToggle():
     if piStat.state == dc.States.Demo1:
+        lock.acquire()
         piStat.state = dc.States.IdleInit
+        lock.release()
     elif piStat.state == dc.States.Demo2:
+        lock.acquire()
         piStat.state = dc.States.Demo1
+        lock.release()
 
 def dummy():
     piStat.state = dc.States.Demo1
     print(piStat.state)
 
+def cv():
+    # Must lock when changing state
+    devLock.acquire()
+    piStat.state = dc.States.IdleInit
+    devLock.acquire()
+
 def getData():
     devLock.acquire()
     potentialData = piStat.potData.potentialData
     currentData = piStat.potData.currentData
-    print("data got")
     devLock.release()
     return potentialData, currentData
 

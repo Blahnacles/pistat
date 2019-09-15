@@ -180,7 +180,9 @@ class ToolBox:
             else:
                 sleep(30)
                 self.potStat.dac_calibrate()
+                lock.acquire()
                 self.state = States.zOffset
+                lock.release()
         elif s == States.zOffset:
             # Clear the data sets
             self.potData.clearData()
@@ -204,7 +206,9 @@ class ToolBox:
             self.autoRange()
             self.potData.clearData()
             # enter idle data reading stage
+            lock.acquire()
             self.state = States.Idle
+            lock.release()
         elif s == States.Idle:
             sleep(0.1)
         elif s == States.CVInit:
@@ -220,7 +224,9 @@ class ToolBox:
                     sleep(0.1)
                 self.autoRange() # autorange after 20 reads
                 self.potData.clearData() # clear data, complete 3 times
+            lock.acquire()
             self.stat = States.Measuring_CV
+            lock.release()
             self.potData.timeStamp = datetime.now()
             self.potData.lastTime= datetime.now()
         elif s == States.Measuring_CV:
@@ -228,7 +234,9 @@ class ToolBox:
             dT = dT.second + dT.microsecond * 1e-6 # seconds elapsed, as float
             voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
             if voltage == None:
+                lock.acquire()
                 self.state = States.Idle
+                lock.release()
             else:
                 self.potStat.vOutput(value=voltage)
                 lock.acquire()
@@ -248,13 +256,15 @@ class ToolBox:
                     sleep(0.1)
                 self.autoRange() # autorange based on 20 reads, then clear data
                 self.potData.clearData()
+            lock.acquire()
             self.state = States.Measuring_PD # enter measurement state
+            lock.release()
         elif s == States.Demo1:
             lock.acquire()
             self.potData.loadData("dummyData.csv")
             print("data read from .csv")
-            lock.release()
             self.state = States.Idle
+            lock.release()
         return 1
         
         

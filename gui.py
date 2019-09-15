@@ -228,6 +228,10 @@ class SimpleMode(tk.Frame):
         #calibrateButton.grid(column=3, row=6)
         calibrateButton.place(x=510, y=200)
 
+        # Connect & calibrate button
+        conButton = ttk.Button(self, text="Initialise CV", command=lambda: testEngine.cv())
+        conButton.place(x=510, y=240)
+
         # lukes new regression stuff here
 
         
