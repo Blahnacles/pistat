@@ -443,10 +443,9 @@ class UsbStat:
     def flashRead(self, designator):
         shunt_calibration = [1.,1.,1.]
         output = []
+        self.dev.write(0x01, designator)
         if designator == b'SHUNTCALREAD':
             # shunt calibration read has a different return type
-            ######## BEGIN DEVICE ACCESS
-            self.dev.write(0x01, designator)
             response = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
             ######## END DEVICE ACCESS
             if response != bytes([255,255,255,255,255,255]): # If no calibration value has been stored, all bits are set
@@ -457,8 +456,6 @@ class UsbStat:
             return shunt_calibration
         output.append(None)
         output.append(None)
-        ######## BEGIN DEVICE ACCESS
-        self.dev.write(0x01,designator) # 0x01 = write address of EP1
         response = bytes(self.dev.read(0x81,64)) # 0x81 = write address of EP1
         ######## END DEVICE ACCESS
         # Check for a stored response within the stat's flash memory
@@ -472,7 +469,8 @@ class UsbStat:
                 # TODO read from flash msg
         else:
             # TODO set defaults when no data is stored
-            output
+            print("No data found for command below:")
+            print(designator)
         return output[0], output[1]
 
     def setCellStatus(self, cell_on_boolean):
