@@ -160,7 +160,7 @@ class ToolBox:
         # LIKELY CAUSE IS MISCALCULATION OF UNDERFLOW IN twoCompDec
         if potential<-8:
             potential+=16
-        # YEAH THAT LINE ABOVE. SHOULD NOT BE THERE - Simon Laffan 2019/09/15
+        # YEAH THAT BLOCK ABOVE. SHOULD NOT BE THERE - Simon Laffan 2019/09/15
         print("v =",potential)
         print("i =",current)
         self.potData.rawPotentialData.append(potential)
@@ -257,7 +257,23 @@ class ToolBox:
             voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
             print("Current voltage input:",voltage)
             if voltage == None:
-                print("Entering Idle state")
+                print("Commencing Deposition")
+                self.potData.clearData()
+                lock.acquire()
+                self.state = States.Measuring_CD
+                lock.release()
+            else:
+                self.potStat.vOutput(value=voltage)
+                lock.acquire()
+                self.dataRead()
+                lock.release()
+        elif s == States.Measuring_CD:
+            dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
+            dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
+            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 0.5)
+            print("Current voltage input:",voltage)
+            if voltage == None:
+                print("Device now idle")
                 lock.acquire()
                 self.state = States.Idle
                 lock.release()
