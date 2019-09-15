@@ -403,6 +403,7 @@ class UsbStat:
         get_shunt_calibration()"""
 
         # Reading settings from device
+        print("RUNRUN")
         if self.dev is not None:
             ##### Getting dac offset & gain
             dOffset, dGain = self.flashRead(b'DACCALGET')
