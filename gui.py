@@ -39,7 +39,6 @@ ani = None
 
 def testAnimate(i):
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
-    print(str(croppedListXFinal is not None))
     xList, yList = testEngine.getData()
     a.clear()
     if testEngine.piStat.offsetBin:
