@@ -407,15 +407,20 @@ class UsbStat:
         if self.dev is not None:
             ##### Getting dac offset & gain
             dOffset, dGain = self.flashRead(b'DACCALGET')
+            print(dOffset)
+            print(dGain)
             #### Getting potential & current offset
-            pOffset, cOffest = self.flashRead(b'OFFSETREAD')
+            pOffset, cOffset = self.flashRead(b'OFFSETREAD')
+            print(pOffset)
+            print(cOffset)
             #### Getting shunt calibration
             shunt_calibration = self.flashRead(b'SHUNTCALREAD')
+            print(shunt_calibration)
             # now set the collected values
             self.dac_offset = dOffset
             self.dac_gain = dGain
             self.potential_offset = pOffset
-            self.current_offset = cOffest
+            self.current_offset = cOffset
             self.shunt_calibration = shunt_calibration
     
     def dac_calibrate(self):
