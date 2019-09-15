@@ -184,6 +184,8 @@ class ToolBox:
                 print("successfully connected - stabilising")
                 sleep(5)
                 self.potStat.dac_calibrate()
+                # debug
+                print("entering zero offset state")
                 lock.acquire()
                 self.state = States.zOffset
                 lock.release()
@@ -211,11 +213,12 @@ class ToolBox:
             self.autoRange()
             self.potData.clearData()
             # enter idle data reading stage
+            # debug
+            print("Entering CV initialisation state")
             lock.acquire()
             self.state = States.CVInit
             lock.release()
         elif s == States.Idle:
-            print("idle")
         elif s == States.CVInit:
             self.potStat.vOutput(value=-0.4) # setting the starting potential
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
@@ -229,6 +232,8 @@ class ToolBox:
                     sleep(0.1)
                 self.autoRange() # autorange after 20 reads
                 self.potData.clearData() # clear data, complete 3 times
+            # debug
+            print("Entering CV measurement phase - ramp, two cycles")
             lock.acquire()
             self.state = States.Measuring_CV
             lock.release()
@@ -241,7 +246,9 @@ class ToolBox:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
             voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
+            print("Current voltage input:",voltage)
             if voltage == None:
+                print("Entering Idle state")
                 lock.acquire()
                 self.state = States.Idle
                 lock.release()
@@ -439,8 +446,7 @@ class UsbStat:
         self.dev.write(0x01, designator)
         response = bytes(self.dev.read(0x81,64))
         if response == bytes([255,255,255,255,255,255]):
-            print("No response for ")
-            print(designator)
+            print("No response for ",designator)
         elif designator == b'SHUNTCALREAD':
             for i in range(0,3):
                 temp = response[2*i:2*i+2]
@@ -491,7 +497,6 @@ class UsbStat:
             return p,i
         return None, None
     def vOutput(self, value=1):
-        print("debug")
         print(self.potential_offset)
         self.send_command(b'DACSET '+self.ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
