@@ -200,6 +200,7 @@ class ToolBox:
                 lock.release()
                 sleep(0.1)
             self.potData.zeroOffset()
+            print("zoffset returned a poffset of ",self.potData.potentialOffset)
             self.potStat.potential_offset = self.potData.potentialOffset
             # sanitise data once again, to prepare for current ranging
             self.potData.clearData()
@@ -464,6 +465,7 @@ class UsbStat:
             elif designator == b'OFFSETREAD':
                 self.potential_offset = a
                 self.current_offset = b
+                print("poffset:",a,"coffset",b)
 
     def setCellStatus(self, cell_on_boolean):
         """Switch the cell connection (True = cell on, False = cell off)."""
