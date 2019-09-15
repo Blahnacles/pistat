@@ -497,7 +497,7 @@ class UsbStat:
         print(self.potential_offset)
         self.send_command(b'DACSET '+self.ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
-    def ddb(v):
+    def ddb(self,v):
         # TODO make it pretty
         code = 2**19 + int(round(v)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
         code = np.clip(code, 0, 2**20 - 1) # If the input exceeds the boundaries of the 20-bit integer, clip it
