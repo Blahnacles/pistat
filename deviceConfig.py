@@ -219,6 +219,7 @@ class ToolBox:
             self.state = States.CVInit
             lock.release()
         elif s == States.Idle:
+            pass
         elif s == States.CVInit:
             self.potStat.vOutput(value=-0.4) # setting the starting potential
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
