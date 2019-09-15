@@ -406,22 +406,11 @@ class UsbStat:
         print("RUNRUN")
         if self.dev is not None:
             ##### Getting dac offset & gain
-            dOffset, dGain = self.flashRead(b'DACCALGET')
-            print(dOffset)
-            print(dGain)
+            self.flashRead(b'DACCALGET')
             #### Getting potential & current offset
-            pOffset, cOffset = self.flashRead(b'OFFSETREAD')
-            print(pOffset)
-            print(cOffset)
+            self.flashRead(b'OFFSETREAD')
             #### Getting shunt calibration
-            shunt_calibration = self.flashRead(b'SHUNTCALREAD')
-            print(shunt_calibration)
-            # now set the collected values
-            self.dac_offset = dOffset
-            self.dac_gain = dGain
-            self.potential_offset = pOffset
-            self.current_offset = cOffset
-            self.shunt_calibration = shunt_calibration
+            self.flashRead(b'SHUNTCALREAD')
     
     def dac_calibrate(self):
         """Activate the automatic DAC1220 calibration function and retrieve the results."""
@@ -447,39 +436,27 @@ class UsbStat:
         return False
 
     def flashRead(self, designator):
-        shunt_calibration = [1.,1.,1.]
         output = []
         self.dev.write(0x01, designator)
-        if designator == b'SHUNTCALREAD':
-            # shunt calibration read has a different return type
-            response = bytes(self.dev.read(0x81,64)) # 0x81 = read address of EP1
-            ######## END DEVICE ACCESS
-            if response != bytes([255,255,255,255,255,255]): # If no calibration value has been stored, all bits are set
-                for i in range(0,3):
-                    temp = response[2*i:2*i+2]
-                    r = float(2**8*temp[0]+temp[1] - 2**15)
-                    shunt_calibration[i] = 1.+r/1e6 # Yields an adjustment range from 0.967 to 1.033 in steps of 1 ppm
-            else:
-                print("No response for SHUNTCALREAD")
-            return shunt_calibration
-        output.append(None)
-        output.append(None)
-        response = bytes(self.dev.read(0x81,64)) # 0x81 = write address of EP1
-        ######## END DEVICE ACCESS
-        # Check for a stored response within the stat's flash memory
-        if response != bytes([255,255,255,255,255,255]):
-                res = response[0:3]
-                # Just a bytes to decimal conversion
-                output[0] = (2**12*res[0]+2**4*res[1]+res[2]/2**4) - 2**19
-                res = response[3:6]
-                # Just a bytes to decimal conversion
-                output[1] = (2**12*res[0]+2**4*res[1]+res[2]/2**4) - 2**19
-                # TODO read from flash msg
+        response = bytes(self.dev.read(0x81,64))
+        if response == bytes([255,255,255,255,255,255]):
+            print("No response for "+designator)
+        elif designator == b'SHUNTCALREAD':
+            for i in range(0,3):
+                temp = response[2*i:2*i+2]
+                r = float(2**8*temp[0]+temp[1] -2**15)
+                self.shunt_calibration[i] = 1.+r/1e6
         else:
-            # TODO set defaults when no data is stored
-            print("No data found for command below:")
-            print(designator)
-        return output[0], output[1]
+            res = response[0:3]
+            a = (2**12*res[0]+2**4*res[1]+res[2]/2**4) - 2**19
+            res = response[3:6]
+            b = (2**12*res[0]+2**4*res[1]+res[2]/2**4) - 2**19
+            if designator == b'DACCALGET':
+                self.dac_offset = a
+                self.dac_gain = b
+            elif designator == b'OFFSETREAD':
+                self.potential_offset = a
+                self.current_offset = b
 
     def setCellStatus(self, cell_on_boolean):
         """Switch the cell connection (True = cell on, False = cell off)."""
