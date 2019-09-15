@@ -198,6 +198,7 @@ class ToolBox:
                 lock.release()
                 sleep(0.1)
             self.potData.zeroOffset()
+            self.potStat.potential_offset = self.potData.potentialOffset
             # sanitise data once again, to prepare for current ranging
             self.potData.clearData()
             for i in range(20):
@@ -384,8 +385,8 @@ class UsbStat:
         #TODO set defaults
         self.dac_offset = None
         self.dac_gain = None
-        self.potential_offset = None
-        self.current_offset = None
+        self.potential_offset = 0
+        self.current_offset = 0
         # Fine adjustment for shunt resistors - R1/10ohm, R2/1kohm, R3/100kohm
         self.shunt_calibration = [1.,1.,1.]
         self.timeStamp = None
@@ -404,7 +405,6 @@ class UsbStat:
         get_shunt_calibration()"""
 
         # Reading settings from device
-        print("RUNRUN")
         if self.dev is not None:
             ##### Getting dac offset & gain
             self.flashRead(b'DACCALGET')
