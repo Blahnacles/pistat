@@ -259,6 +259,8 @@ class ToolBox:
             if voltage == None:
                 print("Commencing Deposition")
                 self.potData.clearData()
+                self.potData.timeStamp = datetime.now()
+                self.potData.lastTime= datetime.now()
                 lock.acquire()
                 self.state = States.Measuring_CD
                 lock.release()
