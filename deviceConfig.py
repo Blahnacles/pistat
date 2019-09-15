@@ -453,6 +453,8 @@ class UsbStat:
                     temp = response[2*i:2*i+2]
                     r = float(2**8*temp[0]+temp[1] - 2**15)
                     shunt_calibration[i] = 1.+r/1e6 # Yields an adjustment range from 0.967 to 1.033 in steps of 1 ppm
+            else:
+                print("No response for SHUNTCALREAD")
             return shunt_calibration
         output.append(None)
         output.append(None)
