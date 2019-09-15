@@ -176,9 +176,12 @@ class ToolBox:
             if not self.connect_disconnect_usb():
                 # If connection fails, try every 5 seconds
                 print("error: failed to connect")
-                sleep(5)
+                lock.acquire()
+                self.state = States.Idle
+                lock.release()
             else:
-                sleep(30)
+                print("successfully connected - stabilising")
+                sleep(5)
                 self.potStat.dac_calibrate()
                 lock.acquire()
                 self.state = States.zOffset
@@ -210,7 +213,7 @@ class ToolBox:
             self.state = States.Idle
             lock.release()
         elif s == States.Idle:
-            sleep(0.1)
+            print("idle")
         elif s == States.CVInit:
             self.potStat.vOutput(value=-0.4) # setting the starting potential
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
@@ -265,7 +268,7 @@ class ToolBox:
             print("data read from .csv")
             self.state = States.Idle
             lock.release()
-        return 1
+        return 0.1
         
         
 

@@ -28,7 +28,7 @@ def cv():
     # Must lock when changing state
     devLock.acquire()
     piStat.state = dc.States.IdleInit
-    devLock.acquire()
+    devLock.release()
 
 def getData():
     devLock.acquire()
