@@ -58,7 +58,7 @@ def testAnimate(i):
         fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
         a.plot(xList, yList)
         a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
-        a.axes.set_yscale("log")
+        a.axes.set_yscale("symlog")
         a.set_xlabel("Potential")
         a.set_ylabel("Current")
         a.set_title("Sample data & regression line")
@@ -68,6 +68,8 @@ def testAnimate(i):
         a.set_xlabel("Potential")
         a.set_ylabel("Current")
         a.set_title("Sample data")
+    #elif testEngine.piStat.state==testEngine.dc.States.Measuring_PD:
+        #a.axes.set_yscale()
     else:
         a.plot(xList)
         a.plot(yList)
