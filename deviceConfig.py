@@ -230,9 +230,7 @@ class ToolBox:
                 self.autoRange() # autorange after 20 reads
                 self.potData.clearData() # clear data, complete 3 times
             lock.acquire()
-            self.state = States.Idle
-            # testing cvInit
-            #self.state = States.Measuring_CV
+            self.state = States.Measuring_CV
             lock.release()
             self.potData.timeStamp = datetime.now()
             self.potData.lastTime= datetime.now()

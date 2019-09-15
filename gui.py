@@ -51,7 +51,7 @@ def testAnimate(i):
         #testEngine.piStat.offsetBin = False
     if testEngine.piStat.state==testEngine.dc.States.Demo1:
         a.plot(xList, yList)
-        a.axes.set_yscale("log")
+        a.axes.set_yscale("symlog")
         a.set_xlabel("Potential")
         a.set_ylabel("Current")
     elif linearRegFlag and croppedListXFinal is not None:
@@ -64,7 +64,7 @@ def testAnimate(i):
         a.set_title("Sample data & regression line")
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
-        a.axes.set_yscale("log")
+        a.axes.set_yscale("symlog")
         a.set_xlabel("Potential")
         a.set_ylabel("Current")
         a.set_title("Sample data")
