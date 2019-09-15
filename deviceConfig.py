@@ -238,6 +238,7 @@ class ToolBox:
             print(self.potData.potentialOffset)
             print(self.potData.currentOffset)
         elif s == States.Measuring_CV:
+            sleep(0.01)
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.microsecond * 1e-6 # seconds elapsed, as float
             voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
