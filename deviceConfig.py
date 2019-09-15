@@ -210,7 +210,7 @@ class ToolBox:
             self.potData.clearData()
             # enter idle data reading stage
             lock.acquire()
-            self.state = States.Idle
+            self.state = States.CVInit
             lock.release()
         elif s == States.Idle:
             print("idle")
@@ -228,10 +228,15 @@ class ToolBox:
                 self.autoRange() # autorange after 20 reads
                 self.potData.clearData() # clear data, complete 3 times
             lock.acquire()
-            self.stat = States.Measuring_CV
+            self.state = States.Idle
+            # testing cvInit
+            #self.state = States.Measuring_CV
             lock.release()
             self.potData.timeStamp = datetime.now()
             self.potData.lastTime= datetime.now()
+            print(self.potData.currentRange)
+            print(self.potData.potentialOffset)
+            print(self.potData.currentOffset)
         elif s == States.Measuring_CV:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.second + dT.microsecond * 1e-6 # seconds elapsed, as float
