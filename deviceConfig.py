@@ -512,7 +512,7 @@ class UsbStat:
 
     def ddb(v):
         # TODO make it pretty
-        code = 2**19 + int(round(value)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
+        code = 2**19 + int(round(v)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
         code = np.clip(code, 0, 2**20 - 1) # If the input exceeds the boundaries of the 20-bit integer, clip it
         byte1 = code // 2**12
         byte2 = (code % 2**12) // 2**4
