@@ -508,6 +508,8 @@ class UsbStat:
             return p,i
         return None, None
     def vOutput(self, value=1):
+        print("debug")
+        print(value)
         self.send_command(b'DACSET '+self.ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
     def ddb(v):
