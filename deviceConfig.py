@@ -498,6 +498,12 @@ class UsbStat:
         if msg != b'WAIT': # 'WAIT' is received if a conversion has not yet finished
             p = twoCompDec(msg[0], msg[1], msg[2]) # raw potential
             i = twoCompDec(msg[3], msg[4], msg[5]) # raw current
+            # TODO DELETE THIS
+            # THIS IS BAD PRACTICE
+            # COMPENSATING FOR TEAMS-219, REMOVE THIS LINE IF THE BUG HAS BEEN FIXED
+            # LIKELY CAUSE IS MISCALCULATION OF UNDERFLOW IN twoCompDec
+            p+=16
+            # YEAH THAT LINE ABOVE. SHOULD NOT BE THERE - Simon Laffan 2019/09/15
             return p,i
         return None, None
     def vOutput(self, value=1):
