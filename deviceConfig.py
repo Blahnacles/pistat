@@ -158,7 +158,7 @@ class ToolBox:
         self.potData.rawPotentialData.append(potential)
         self.potData.potentialData.append(potential)
         self.potData.rawCurrentData.append(current)
-        if self.currentRange == b'RANGE 3':
+        if self.potDatacurrentRange == b'RANGE 3':
             current *= 1e3
         self.potData.currentData.append(current)
         
