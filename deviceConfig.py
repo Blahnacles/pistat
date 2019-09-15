@@ -136,6 +136,7 @@ class ToolBox:
                 # If connection successful, get info & setup
                 # TODO Usb interface connected msg
                 try:
+                    self.potStat.dac_calibrate()
                     self.potStat.get_dac_settings()
                     print("Settings obtained")
                     self.potStat.setCellStatus(False)
@@ -440,7 +441,8 @@ class UsbStat:
         self.dev.write(0x01, designator)
         response = bytes(self.dev.read(0x81,64))
         if response == bytes([255,255,255,255,255,255]):
-            print("No response for "+designator)
+            print("No response for ")
+            print(designator)
         elif designator == b'SHUNTCALREAD':
             for i in range(0,3):
                 temp = response[2*i:2*i+2]
