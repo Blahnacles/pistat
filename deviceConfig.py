@@ -42,8 +42,8 @@ class GraphData:
         Used to be called zero_offset, offset_changed_callback omitted as it
         is a GUI related function."""
         # Screw these two lines, has to be a better way - SBL
-        self.potentialOffset = int(round(np.average(list(self.rawPotentialData))))
-        self.currentOffset = int(round(np.average(list(self.rawCurrentData))))
+        self.potentialOffset = int(round(-np.average(list(self.rawPotentialData))))
+        self.currentOffset = int(round(-np.average(list(self.rawCurrentData))))
 
     def sweepCalc(self, dT, uV, vV, uBound, lBound,rate,cycles):
         """Return the potential after a given time differential along a cv ramp
@@ -200,7 +200,7 @@ class ToolBox:
                 lock.release()
                 sleep(0.1)
             self.potData.zeroOffset()
-            print("zoffset returned a poffset of ",self.potData.potentialOffset)
+            print("zoffset returned a poffset of ",self.potData.potentialOffset,"and a coffset of",self.potData.currentOffset)
             self.potStat.potential_offset = self.potData.potentialOffset
             # sanitise data once again, to prepare for current ranging
             self.potData.clearData()
