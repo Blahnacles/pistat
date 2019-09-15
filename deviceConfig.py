@@ -154,8 +154,8 @@ class ToolBox:
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
-        print(potential)
-        print(current)
+        print("v =",potential)
+        print("i =",current)
         self.potData.rawPotentialData.append(potential)
         self.potData.potentialData.append(potential)
         self.potData.rawCurrentData.append(current)
@@ -485,6 +485,7 @@ class UsbStat:
             combined_value = (msb%64)*2**16+midb*2**8+lsb # Get rid of overflow bits
             ovh = (msb > 63) and (msb < 128) # Check for Theoverflow high (B22 set)
             ovl = (msb > 127) # Check for overflow low (B23 set)
+            print("----new read: ovh =",ovh,"ovl =",ovl,"combined value =",combined_value)
             if ovl or not ovh:
                 return (combined_value - 2**22)
             else:
