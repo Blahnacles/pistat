@@ -5,6 +5,7 @@ import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
 import sqlite3
+# edit
 class States:
     """
     Named list of states to be used as a simple state machine.
