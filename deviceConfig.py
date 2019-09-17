@@ -28,6 +28,8 @@ class GraphData:
         self.rawCurrentData = collections.deque(maxlen=200)
         self.rawPotentialData.append(0)
         self.rawCurrentData.append(0.5)
+
+
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
@@ -39,26 +41,37 @@ class GraphData:
 
     def exportToSQLITE(self):
         conn = sqlite3.connect('piStat.db')
-        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES (-1, 0.5, 0.123)'
+        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
 
-        for i in range( len( list(self.rawPotentialData) )):
+        for i in range(len(list(self.rawPotentialData))):
             c1 = list(self.rawPotentialData)[i]
             c2 = list(self.rawCurrentData)[i]
-            sqlStatement += ',(%d, %f, %f)' % ( i, c1, c2)
+            sqlStatement += '(%d, %f, %f),' % (i, c1, c2)
 
-        sqlStatement += ';'
+        sqlStatement = sqlStatement[:-1] + ';'
 
         c = conn.cursor()
-        c.execute( sqlStatement )
+        c.execute(sqlStatement)
 
         conn.commit()
 
         conn.close()
 
-    def exportRawPotentialDataToFile( self):
+    def exportRawPotentialDataToFile(self):
         with open('rawPotentialData.csv', 'w') as outfile:
-            for row in list( self.rawPotentialData):
-                outfile.write( '%f\n' % row )
+            for row in list(self.rawPotentialData):
+                outfile.write('%f\n' % row)
+
+    def exportArrayDataToFile(filename, dataArray):
+        '''
+        Exports data to a csv file
+        :param dataArray: must be a list of tuples. Each tuple contains 2 data.
+        :return:
+        '''
+        with open(filename, 'w') as outfile:
+            outfile.write('potential,current\n')
+            for row in list(dataArray):
+                outfile.write( '%f,%f\n' % row[0], row[1] )
 
     def exportRawCurrentDataToFile( self):
         with open('rawCurrentData.csv', 'w') as outfile:
