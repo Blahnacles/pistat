@@ -69,11 +69,34 @@ class GraphData:
         :param dataArray: must be a list of tuples. Each tuple contains 2 data.
         :return:
         '''
+        i = 0
         with open(filename, 'w') as outfile:
-            outfile.write('potential,current\n')
+            outfile.write('index,potential,current\n')
             for row in list(dataArray):
-                outfile.write( '%f,%f\n' % row[0], row[1] )
+                outfile.write('%d,%f,%f\n' % (i, row[0], row[1]))
+                i += 1
 
+    def exportArrayDataToSQLITE(DBfilename, dataArray):
+        '''
+        Exports data to a csv file
+        :param dataArray: must be a list of tuples. Each tuple contains 2 data.
+        :return:
+        '''
+        conn = sqlite3.connect(DBfilename)
+        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
+
+        for i in range(len(list(dataArray))):
+            c1 = dataArray[i][0]
+            c2 = dataArray[i][1]
+            sqlStatement += '(%d, %f, %f),' % (i, c1, c2)
+
+        sqlStatement = sqlStatement[:-1] + ';'
+
+        c = conn.cursor()
+        c.execute(sqlStatement)
+
+        conn.commit()
+        
     def exportRawCurrentDataToFile( self):
         with open('rawCurrentData.csv', 'w') as outfile:
             for row in list( self.rawCurrentlData):
