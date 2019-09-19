@@ -275,7 +275,7 @@ class ToolBox:
         elif s == States.Measuring_CD:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
-            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 0.25)
+            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 0)
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("Device now idle")
