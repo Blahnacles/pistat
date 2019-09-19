@@ -59,11 +59,14 @@ class GraphData:
         phase3 = abs(vV-uBound)
         sweepVal = rate*dT
         if sweepVal < phase1: # Have not passed first ramp
+            print("phase1, sweepval = ",sweepVal)
             return uV + sweepVal # Therefore simply add the differential to the initial potential
         elif sweepVal < phase1+phase2: # Mid Cycle
+            print("phase2, sweepval = ",sweepVal)
             sweepVal -= phase1
             return lBound + abs((sweepVal)%(2*(uBound-lBound))-(uBound-lBound))
         elif sweepVal < phase1+phase2+phase3:
+            print("phase3, sweepval = ",sweepVal)
             sweepVal -= phase1 + phase2
             if vV > uBound:
                 return uBound + sweepVal
