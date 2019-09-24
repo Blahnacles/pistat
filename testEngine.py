@@ -30,6 +30,17 @@ def cv():
     piStat.state = dc.States.IdleInit
     devLock.release()
 
+def depositionData():
+	"""return the deposition data, or to return an
+	appropriate error/exception
+	if the data is not yet available."""
+	
+	devLock.acquire()
+	params, v, i = dc.saveArrays()
+	devLock.release()
+	
+	return v, i
+
 def getData():
     devLock.acquire()
     potentialData = piStat.potData.potentialData

@@ -422,6 +422,15 @@ class ToolBox:
         # change current range setting on hardware
         self.potStat.send_command(cRange, b'OK')
 
+    def saveArrays(self):
+        """TEAMS-203
+        get v & i arrays, metadata and
+        output them to be stored in the DB"""
+        v = self.potData.potentialData
+        i = self.potData.currentData
+        p = self.params
+        params = {'initialVoltage':p[0], 'finalVoltage':p[1], 'voltageCeiling':p[2], 'voltageFloor':p[3], 'scanRate':p[4], 'cycles': p[5]}
+        return params, v, i
         
         
 
