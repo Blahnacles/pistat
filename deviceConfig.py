@@ -59,11 +59,14 @@ class GraphData:
         phase3 = abs(vV-uBound)
         sweepVal = rate*dT
         if sweepVal < phase1: # Have not passed first ramp
+            print("phase1, sweepval = ",sweepVal)
             return uV + sweepVal # Therefore simply add the differential to the initial potential
         elif sweepVal < phase1+phase2: # Mid Cycle
+            print("phase2, sweepval = ",sweepVal)
             sweepVal -= phase1
             return lBound + abs((sweepVal)%(2*(uBound-lBound))-(uBound-lBound))
         elif sweepVal < phase1+phase2+phase3:
+            print("phase3, sweepval = ",sweepVal)
             sweepVal -= phase1 + phase2
             if vV > uBound:
                 return uBound + sweepVal
@@ -115,6 +118,7 @@ class ToolBox:
         #timer.timeout.connect(self.action) # call this function
         #timer.start(p) # every p ms
         self.offsetBin = False
+        self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 1]
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
         """
@@ -254,7 +258,15 @@ class ToolBox:
         elif s == States.Measuring_CV:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
-            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 1)
+            lock.acquire() # avoid collisions with gui
+            uV = self.params[0] # get params for sweepCalc
+            vV = self.params[1]
+            uBound = self.params[2]
+            lBound = self.params[3]
+            rate = self.params[4]
+            cycles = self.params[5]
+            lock.release()
+            voltage = self.potData.sweepCalc(dT, uV, vV, uBound, lBound, rate, cycles)
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("Commencing Deposition")
@@ -270,9 +282,17 @@ class ToolBox:
                 self.dataRead()
                 lock.release()
         elif s == States.Measuring_CD:
+            lock.acquire() # avoid collisions with gui
+            uV = self.params[0] # get params for sweepCalc
+            vV = self.params[1]
+            uBound = self.params[2]
+            lBound = self.params[3]
+            rate = self.params[4]
+            cycles = self.params[5]
+            lock.release()
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
-            voltage = self.potData.sweepCalc(dT, -0.4, 0.4, 0.4, -0.4, 0.1, 0.25)
+            voltage = self.potData.sweepCalc(dT, uV, vV, uBound, lBound, rate, cycles)
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("Device now idle")
