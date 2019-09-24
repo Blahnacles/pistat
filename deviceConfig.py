@@ -276,6 +276,7 @@ class ToolBox:
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("Device now idle")
+                self.potStat.setCellStatus(False)
                 lock.acquire()
                 self.state = States.Idle
                 lock.release()
