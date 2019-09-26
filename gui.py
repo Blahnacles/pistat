@@ -1,6 +1,7 @@
 import testEngine
 import tkinter as tk
 from tkinter import ttk
+from tkinter import *
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -26,6 +27,7 @@ croppedListXFinal = None
 global croppedListYFinal
 croppedListYFinal = None
 global xList, yList
+global upVolt, lowVolt
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -35,7 +37,23 @@ firstRead = timeit.default_timer()
 lastRead = firstRead
 tSum = lastRead
 ani = None
-
+def onclick(event):
+    print(event.xdata, event.ydata)
+    global ix, iy
+    ix, iy = event.xdata, event.ydata
+    global xCoords
+    xCoords.append(ix)
+    global yCoords
+    yCoords.append(iy)
+    global len
+    len +=1
+    print(len)
+    if(len==3):
+        xCoords = []
+        xCoords.append(ix)
+        yCoords = []
+        yCoords.append(iy)
+        len = 1
 
 def testAnimate(i):
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
@@ -183,6 +201,14 @@ class SimpleMode(tk.Frame):
 
         #latrobeLabel = tk.label(self, image=latrobeShowImage)
         #latrobeLabel.place(x=0, y=0)
+
+        def updatePlot():
+            a.plot(xCoords, yCoords)
+            canvas.draw()
+
+        def getVoltage():
+            upVolt = upperScale.get()
+            lowVolt = lowerScale.get()
         
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         #colourLabelY.grid(column=0, rowspan=4)
@@ -229,10 +255,25 @@ class SimpleMode(tk.Frame):
         #calibrateButton.grid(column=3, row=6)
         calibrateButton.place(x=510, y=200)
 
+        #Sliders for Upper/Lower voltage bounds
+        scaleLabelUpper = tk.Label(self, text="Upper Voltage")
+        scaleLabelUpper.place(x=640, y=60)
+        scaleLabelLower = tk.Label(self, text="Lower Voltage")
+        scaleLabelLower.place(x=640, y=110)
+
+        upperScale = Scale(self, from_=-2, to=2, orient=HORIZONTAL, resolution=0.1)
+        upperScale.place(x=600, y=90)
+        lowerScale = Scale(self, from_=-20, to=20, orient=HORIZONTAL, resolution=0.1)
+        lowerScale.place(x=600, y=140)
+
+        voltButton = ttk.Button(self, text="get Voltages", command=getVoltage)
+        voltButton.place(x=600, y=170)
+
         # Connect & calibrate button
         conButton = ttk.Button(self, text="Initialise CV", command=lambda: testEngine.cv())
         conButton.place(x=510, y=240)
 
+        cid = f.canvas.mpl_connect('button_press_event', onclick)
         # lukes new regression stuff here
 
         
