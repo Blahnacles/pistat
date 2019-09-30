@@ -209,6 +209,12 @@ class SimpleMode(tk.Frame):
         def getVoltage():
             upVolt = upperScale.get()
             lowVolt = lowerScale.get()
+            if (lowVolt < upVolt) :
+                # Error handling
+                tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
+            else:
+                # Do voltage setting stuff here
+                pass
         
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         #colourLabelY.grid(column=0, rowspan=4)
