@@ -48,6 +48,9 @@ def getData():
     devLock.release()
     return potentialData, currentData
 
+def setVoltage(vLow, vHigh):
+    piStat.params[2] = vHigh
+    piStat.params[3] = vLow
 # Create the daemon thread (exits when main thread exits)
 deviceThread = threading.Thread(target=actionThread,name='deviceThread', daemon=True)
 # Start the daemon thread

@@ -28,6 +28,11 @@ global croppedListYFinal
 croppedListYFinal = None
 global xList, yList
 global upVolt, lowVolt
+global xCoords, yCoords
+global pSelect
+xCoords = []
+yCoords = []
+pSelect = False
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -38,22 +43,12 @@ lastRead = firstRead
 tSum = lastRead
 ani = None
 def onclick(event):
+    global xCoords, yCoords
     print(event.xdata, event.ydata)
-    global ix, iy
     ix, iy = event.xdata, event.ydata
-    global xCoords
-    xCoords.append(ix)
-    global yCoords
-    yCoords.append(iy)
-    global len
-    len +=1
-    print(len)
-    if(len==3):
-        xCoords = []
+    if ix is not None and iy is not None :
         xCoords.append(ix)
-        yCoords = []
         yCoords.append(iy)
-        len = 1
 
 def testAnimate(i):
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
@@ -134,6 +129,19 @@ class Deploy(tk.Tk):
     @staticmethod
     def testFunction():
         print("Testing!")
+def getLineParameters():
+    global pSelect, xCoords, yCoords
+    if pSelect:
+        # do n point regression here, similar to the below function - SBL
+        # TEAMS-201
+        pass
+    else:
+        # Enable point recording
+        pSelect = True
+        # Reset point value buffers
+        xCoords = []
+        yCoords = []
+    
 
 def getLinearParameters(entryX1,entryX2):
     """Takes two points, and performs a linear regression for all points except the range between x1 & x2"""
@@ -209,12 +217,12 @@ class SimpleMode(tk.Frame):
         def getVoltage():
             upVolt = upperScale.get()
             lowVolt = lowerScale.get()
-            if (lowVolt < upVolt) :
+            if (lowVolt > upVolt) :
                 # Error handling
                 tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
             else:
                 # Do voltage setting stuff here
-                pass
+                testEngine.setVoltage(lowVolt,upVolt)
         
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         #colourLabelY.grid(column=0, rowspan=4)
@@ -250,7 +258,7 @@ class SimpleMode(tk.Frame):
         entryX2 = ttk.Entry(self)
         #entryX2.grid(column=2, row = 2, pady=5)
         entryX2.place(x=510, y=120)
-        setLinearRegressionButton = ttk.Button(self, text="Line Reg", command=lambda: getLinearParameters(float(entryX1.get()),float(entryX2.get())))
+        setLinearRegressionButton = ttk.Button(self, text="Select Data Points", command=lambda: getLineParameters())
         # ^ holy brackets batman!
         #setLinearRegressionButton.grid(column=3, row=5)
         setLinearRegressionButton.place(x=510, y=160)

@@ -118,6 +118,7 @@ class ToolBox:
         #timer.timeout.connect(self.action) # call this function
         #timer.start(p) # every p ms
         self.offsetBin = False
+        # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
         self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 1]
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
@@ -182,7 +183,6 @@ class ToolBox:
     def action(self,lock):
         """State machine for regular cyclic voltammetry operation. Added 06/08/2019 SBL"""
         s = self.state
-        print(s)
         if s == States.IdleInit:
             # IdleInit means a connection to the device has not been made
             if not self.connect_disconnect_usb():
