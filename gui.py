@@ -32,7 +32,7 @@ global xCoords, yCoords
 global pSelect
 xCoords = []
 yCoords = []
-pSelect = False
+pSelect = 0
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -42,13 +42,7 @@ firstRead = timeit.default_timer()
 lastRead = firstRead
 tSum = lastRead
 ani = None
-def onclick(event):
-    global xCoords, yCoords
-    print(event.xdata, event.ydata)
-    ix, iy = event.xdata, event.ydata
-    if ix is not None and iy is not None :
-        xCoords.append(ix)
-        yCoords.append(iy)
+
 
 def testAnimate(i):
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
@@ -129,18 +123,7 @@ class Deploy(tk.Tk):
     @staticmethod
     def testFunction():
         print("Testing!")
-def getLineParameters():
-    global pSelect, xCoords, yCoords
-    if pSelect:
-        # do n point regression here, similar to the below function - SBL
-        # TEAMS-201
-        pass
-    else:
-        # Enable point recording
-        pSelect = True
-        # Reset point value buffers
-        xCoords = []
-        yCoords = []
+
     
 
 def getLinearParameters(entryX1,entryX2):
@@ -214,16 +197,6 @@ class SimpleMode(tk.Frame):
             a.plot(xCoords, yCoords)
             canvas.draw()
 
-        def getVoltage():
-            upVolt = upperScale.get()
-            lowVolt = lowerScale.get()
-            if (lowVolt > upVolt) :
-                # Error handling
-                tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
-            else:
-                # Do voltage setting stuff here
-                testEngine.setVoltage(lowVolt,upVolt)
-        
         colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
         #colourLabelY.grid(column=0, rowspan=4)
         colourLabelY.place(x=0, y=0, height=480, width=50 )
@@ -251,44 +224,107 @@ class SimpleMode(tk.Frame):
         x1Label = tk.Label(self, text="X1 Value")
         x1Label.place(x=515, y=60)
         x2Label = tk.Label(self, text="X2 Value")
-        x2Label.place(x=515, y=100)
-        entryX1 = ttk.Entry(self)
+        x2Label.place(x=515, y=140)
+        entryX1 = ttk.Entry(self, width=10)
         #entryX1.grid(column=3, row = 2)
         entryX1.place(x=510, y=80)
-        entryX2 = ttk.Entry(self)
+        entryX2 = ttk.Entry(self, width=10)
         #entryX2.grid(column=2, row = 2, pady=5)
-        entryX2.place(x=510, y=120)
-        setLinearRegressionButton = ttk.Button(self, text="Select Data Points", command=lambda: getLineParameters())
-        # ^ holy brackets batman!
+        entryX2.place(x=510, y=160)
+        x1Label.place_forget()
+        x2Label.place_forget()
+        entryX1.place_forget()
+        entryX2.place_forget()
+        setLinearRegressionButton = ttk.Button(self, text="Select Data Points")
         #setLinearRegressionButton.grid(column=3, row=5)
-        setLinearRegressionButton.place(x=510, y=160)
-        buttonExpertMode = ttk.Button(self, text="Expert", command=lambda: controller.show_frame(ExpertMode))
+        setLinearRegressionButton.place(x=510, y=280)
+        sLRBcancel = ttk.Button(self, text="Reset Point Selection")
+        sLRBcancel.place(x=510,y=260)
+        sLRBcancel.place_forget()
+        buttonExpertMode = ttk.Button(self, text="Expert")
         #buttonExpertMode.grid(column=3, row=1)
         buttonExpertMode.place(x=50, y=445, width = 60)
-        calibrateButton = ttk.Button(self, text="Load Data", command=lambda: testEngine.dummy())
+        calibrateButton = ttk.Button(self, text="Load Data")
         #calibrateButton.grid(column=3, row=6)
         calibrateButton.place(x=510, y=200)
 
         #Sliders for Upper/Lower voltage bounds
         scaleLabelUpper = tk.Label(self, text="Upper Voltage")
-        scaleLabelUpper.place(x=640, y=60)
+        scaleLabelUpper.place(x=515, y=60)
         scaleLabelLower = tk.Label(self, text="Lower Voltage")
-        scaleLabelLower.place(x=640, y=110)
+        scaleLabelLower.place(x=515, y=120)
 
-        upperScale = Scale(self, from_=-2, to=2, orient=HORIZONTAL, resolution=0.1)
-        upperScale.place(x=600, y=90)
-        lowerScale = Scale(self, from_=-20, to=20, orient=HORIZONTAL, resolution=0.1)
-        lowerScale.place(x=600, y=140)
+        upperScale = Scale(self, from_=-2, to=2, orient=HORIZONTAL, resolution=0.1, length=100)
+        upperScale.place(x=515, y=80)
+        lowerScale = Scale(self, from_=-2, to=2, orient=HORIZONTAL, resolution=0.1)
+        lowerScale.place(x=515, y=135)
 
-        voltButton = ttk.Button(self, text="get Voltages", command=getVoltage)
-        voltButton.place(x=600, y=170)
+        voltButton = ttk.Button(self, text="Set Voltages")
+        voltButton.place(x=650, y=95)
+
 
         # Connect & calibrate button
-        conButton = ttk.Button(self, text="Initialise CV", command=lambda: testEngine.cv())
+        conButton = ttk.Button(self, text="Initialise CV")
         conButton.place(x=510, y=240)
-
+        
+        # Button and UI interaction functions
+        def onclick(event):
+            global xCoords, yCoords, pSelect
+            ix, iy = event.xdata, event.ydata
+            if ix is not None and iy is not None and pSelect==1:
+                print(ix,iy)
+                xCoords.append(ix)
+                yCoords.append(iy)
+                setLinearRegressionButton.configure(text=str(len(xCoords))+" points - confirm?")
         cid = f.canvas.mpl_connect('button_press_event', onclick)
-        # lukes new regression stuff here
+        def getLineParameters():
+            global pSelect, xCoords, yCoords
+            if pSelect==2:
+                pSelect = 0
+                setLinearRegressionButton.configure(text="Select Data Points")
+            elif pSelect==1:
+                # do n point regression here, similar to the below function - SBL
+                # TEAMS-201
+                # Enter regression state
+                pSelect = 2
+                # Reset line details
+                setLinearRegressionButton.configure(text="Clear Line")
+                sLRBcancel.place_forget()
+                pass
+            else:
+                setLinearRegressionButton.configure(text="0 points selected")
+                # Enable point recording
+                pSelect = 1
+                # Reset point value buffers
+                xCoords = []
+                yCoords = []
+                sLRBcancel.place(x=640,y=280)
+        def lineCancel():
+            global pSelect
+            pSelect = 0
+            sLRBcancel.place_forget()
+            setLinearRegressionButton.configure(text="Select Data Points")
+        def getVoltage():
+            upVolt = upperScale.get()
+            lowVolt = lowerScale.get()
+            if (lowVolt > upVolt) :
+                # Error handling
+                tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
+            else:
+                # Do voltage setting stuff here
+                a,b=testEngine.setVoltage(lowVolt,upVolt)
+                tk.messagebox.showinfo("Voltage Set", "Voltage successfully set - floor: "+str(a)+"V, ceiling: "+str(b)+"V")
+
+        # Assigning commands to buttons
+        voltButton.configure(command=lambda: getVoltage())
+        buttonExpertMode.configure(command=lambda: controller.show_frame(ExpertMode))
+        conButton.configure(command=lambda: testEngine.cv())
+        setLinearRegressionButton.configure(command=lambda: getLineParameters())
+        calibrateButton.configure(command=lambda: testEngine.dummy())
+        sLRBcancel.configure(command=lambda:lineCancel())
+
+        
+
 
         
         
