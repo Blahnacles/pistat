@@ -64,7 +64,7 @@ def testAnimate(i):
 
         a.axes.set_ylim(miny-(maxy-miny)*0.1, maxy)
         a.axes.set_xlim(min(xList)*1.1,max(xList)*1.1)
-        a.axes.set_yscale("symlog") # why though?
+        #a.axes.set_yscale("symlog") # why though?
     a.set_xlabel("Potential")
     a.set_ylabel("Current")
     

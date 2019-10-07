@@ -226,9 +226,9 @@ class ToolBox:
             self.potData.clearData()
             # enter idle data reading stage
             # debug
-            print("Entering CV initialisation state")
+            print("Connection complete, entering Idle mode")
             lock.acquire()
-            self.state = States.CVInit
+            self.state = States.Idle
             lock.release()
         elif s == States.Idle:
             pass
@@ -237,36 +237,29 @@ class ToolBox:
             self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
             self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
             self.potStat.setCellStatus(True) # Cell on
-            for j in range(3):
-                for i in range(20):
-                    lock.acquire()
-                    self.dataRead() # 20 reads
-                    lock.release()
-                    sleep(0.1)
-                self.autoRange() # autorange after 20 reads
-                self.potData.clearData() # clear data, complete 3 times
+            sleep(0.5)
+            for j in range(10):
+                lock.acquire()
+                self.dataRead()
+                lock.release()
+                sleep(0.1)
+            self.autoRange() # autorange after 20 reads
+            self.potData.clearData() # clear data, complete 3 times
             # debug
-            print("Entering CV measurement phase - ramp, two cycles")
+            print("Entering CV measurement phase")
             lock.acquire()
             self.state = States.Measuring_CV
             lock.release()
+            # set timestamp for measurement stage, aids in calculation of dT
             self.potData.timeStamp = datetime.now()
             self.potData.lastTime= datetime.now()
-            print(self.potData.currentRange)
-            print(self.potData.potentialOffset)
-            print(self.potData.currentOffset)
         elif s == States.Measuring_CV:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
-            lock.acquire() # avoid collisions with gui
-            uV = self.params[0] # get params for sweepCalc
-            vV = self.params[1]
-            uBound = self.params[2]
-            lBound = self.params[3]
-            rate = self.params[4]
-            cycles = self.params[5]
+            lock.acquire() # Avoid thread collisions
+            # calculate appropriate voltage level using given parameters
+            voltage = self.potData.sweepCalc(dT, self.params[0], self.params[1], self.params[2], self.params[3], self.params[4], self.params[5])
             lock.release()
-            voltage = self.potData.sweepCalc(dT, uV, vV, uBound, lBound, rate, cycles)
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("Commencing Deposition")
@@ -274,7 +267,7 @@ class ToolBox:
                 self.potData.timeStamp = datetime.now()
                 self.potData.lastTime= datetime.now()
                 lock.acquire()
-                self.state = States.Measuring_CD
+                self.state = States.Idle
                 lock.release()
             else:
                 self.potStat.vOutput(value=voltage)
@@ -404,17 +397,17 @@ class ToolBox:
         Then uses this value to set the desired shunt resistor,
         and format the data."""
         size = len(self.potData.rawCurrentData)
-        iVals = list(self.potData.rawCurrentData)[size-20:size]
+        iVals = list(self.potData.rawCurrentData)[:]
         iMean = abs(sum(iVals)/size)
         if iMean <= 0.002:
             # 2uA range - RANGE 1
-            cRange = b'RANGE 1'
+            cRange = b'RANGE 3'
         elif iMean <= 0.2:
             # 200uA range - RANGE 2
             cRange = b'RANGE 2'
         else:
             # 20mA range - RANGE 3
-            cRange = b'RANGE 3'
+            cRange = b'RANGE 1'
         # The more I type range, the less it seems like a word
         # range range range range range
         # set range within data object
