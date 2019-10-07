@@ -48,15 +48,21 @@ ani = None
 
 
 def testAnimate(i):
-    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
+    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList, pSelect
     xList, yList = testEngine.getData()
     a.clear()
     a.autoscale(False)
     if len(xList):
         a.plot(xList,yList)
         if len(xCoords):
-            a.scatter(xCoords,yCoords)
-        a.axes.set_ylim(min(yList)*1.1,max(yList)*1.1)
+            if pSelect == 2:
+                a.plot(xCoords,yCoords)
+            else:
+                a.scatter(xCoords,yCoords)
+        miny = min(yList)
+        maxy = max(yList)
+
+        a.axes.set_ylim(miny-(maxy-miny)*0.1, maxy)
         a.axes.set_xlim(min(xList)*1.1,max(xList)*1.1)
         a.axes.set_yscale("symlog") # why though?
     a.set_xlabel("Potential")
@@ -301,6 +307,8 @@ class SimpleMode(tk.Frame):
             global pSelect, xCoords, yCoords
             if pSelect==2:
                 pSelect = 0
+                xCoords = []
+                yCoords = []
                 setLinearRegressionButton.configure(text="Select Data Points")
             elif pSelect==1:
                 # do n point regression here, similar to the below function - SBL
