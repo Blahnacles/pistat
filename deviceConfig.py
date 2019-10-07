@@ -5,6 +5,26 @@ import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
 import sqlite3
+
+import gpsd
+from gps import *
+from time import *
+import time
+import threading
+
+class GpsPoller(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.gpsd = gps(mode=WATCH_ENABLE)  # starting the stream of info
+        self.running = True  # setting the thread running to true
+
+    def run(self):
+        while self.running:
+            self.gpsd.next()  # this will continue to loop and grab EACH set of gpsd info to clear the buffer
+
+
+
+
 # edit
 class States:
     """
@@ -29,6 +49,26 @@ class GraphData:
         self.rawCurrentData = collections.deque(maxlen=200)
         self.rawPotentialData.append(0)
         self.rawCurrentData.append(0.5)
+
+    def initGPSv1(self):
+        self.gpsp = GpsPoller()  # create the thread
+        try:
+            self.gpsp.start()  # start it up
+
+    def pollGPSv1(self):
+        time.sleep(5)
+        return  self.gpsd.fix.latitude, self.gpsd.fix.longitude, self.gpsd.utc, self.gpsd.fix.time, self.gpsd.fix.altitude, self.gpsd.fix.eps, self.gpsd.fix.epx, self.gpsd.fix.epv, self.gpsd.fix.ept, self.gpsd.fix.speed,self.gpsd.fix.climb, self.gpsd.fix.track, self.gpsd.fix.mode, self.gpsd.satellites
+
+
+    def initGPSv2(self):
+        gpsd.connect()
+
+    def pollGPSv2(self):
+        time.sleep(5)
+        gpsPacket = gpsd.get_current()
+        return gpsPacket
+        #return  self.gpsd.fix.latitude, self.gpsd.fix.longitude, self.gpsd.utc, self.gpsd.fix.time, self.gpsd.fix.altitude, self.gpsd.fix.eps, self.gpsd.fix.epx, self.gpsd.fix.epv, self.gpsd.fix.ept, self.gpsd.fix.speed,self.gpsd.fix.climb, self.gpsd.fix.track, self.gpsd.fix.mode, self.gpsd.satellites
+
 
 
     def zeroOffset(self):
@@ -96,7 +136,7 @@ class GraphData:
         c.execute(sqlStatement)
 
         conn.commit()
-        
+
     def exportRawCurrentDataToFile( self):
         with open('rawCurrentData.csv', 'w') as outfile:
             for row in list( self.rawCurrentlData):
