@@ -11,7 +11,7 @@ from matplotlib import style
 import timeit
 import time
 import numpy as np
-#from PIL import Image, ImageTk
+from PIL import Image, ImageTk
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
@@ -33,6 +33,9 @@ global pSelect
 xCoords = []
 yCoords = []
 pSelect = 0
+global selX, selY
+selX = []
+selY = []
 
 
 #p = 1e3*0.09 # read every 90 ms
@@ -71,6 +74,7 @@ def testAnimate(i):
         a.set_title("Sample data & regression line")
     elif testEngine.piStat.state==testEngine.dc.States.Idle:
         a.plot(xList, yList)
+        a.scatter(xCoords,yCoords)
         a.axes.set_yscale("symlog")
         a.set_xlabel("Potential")
         a.set_ylabel("Current")
@@ -221,8 +225,13 @@ class SimpleMode(tk.Frame):
         #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         seperationLabel = tk.Label(self, background="black")
         seperationLabel.place(x=500, y=0, height=480, width=5)
+        # LTU icon
+        img = ImageTk.PhotoImage(Image.open("latrobeicon.jpg"))
+        panel = tk.Label(self, image=img)
+        panel.image = img
+        panel.place(x=515,y=60)
         x1Label = tk.Label(self, text="X1 Value")
-        x1Label.place(x=515, y=60)
+        x1Label.place(x=0, y=0)
         x2Label = tk.Label(self, text="X2 Value")
         x2Label.place(x=515, y=140)
         entryX1 = ttk.Entry(self, width=10)
