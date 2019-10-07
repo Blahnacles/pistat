@@ -342,7 +342,42 @@ class SimpleMode(tk.Frame):
                 # Do voltage setting stuff here
                 a,b=testEngine.setVoltage(lowVolt,upVolt)
                 tk.messagebox.showinfo("Voltage Set", "Voltage successfully set - floor: "+str(a)+"V, ceiling: "+str(b)+"V")
+        
+        def calcHeight():
+		
+		global xList, yList, xCoords, yCoords
 
+		#Gets max value from array
+		maxHeightX = max(xList)
+
+		#get the index of the max value for x
+	
+		maxHeightXIndex = xList.index(maxHeightX)
+
+		#get value from the index of the max height value
+
+		maxHeightY = yList[maxHeightXIndex]
+	
+		#p1 = [maxHeightX, maxHeightY]
+		#p2 = [ix, iy]
+
+		#distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
+
+		for i in range(len(xCoords))
+			if(xCoords[i] > maxHeightX)
+				x1 = xCoords[i]
+				y1 = yCoords[i]
+				x2 = xCoords[i-1]
+				y2 = yCoords[i-1]
+
+		m = y2 - y1 / x2 - x1
+
+		c = y1 - m * x1
+
+		yD = maxHeightX * m + c
+
+		return maxHeightY - yD 
+        
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
         buttonExpertMode.configure(command=lambda: controller.show_frame(ExpertMode))
