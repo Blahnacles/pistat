@@ -243,7 +243,7 @@ class SimpleMode(tk.Frame):
         seperationLabel = tk.Label(self, background="black")
         seperationLabel.place(x=500, y=0, height=480, width=5)
         # LTU icon
-        img = ImageTk.PhotoImage(Image.open("latrobeicon.jpg"))
+        img = ImageTk.PhotoImage(file="latrobeicon.jpg")
         panel = tk.Label(self, image=img)
         panel.image = img
         panel.place(x=515,y=60)
