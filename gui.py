@@ -51,39 +51,50 @@ def testAnimate(i):
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
     xList, yList = testEngine.getData()
     a.clear()
-    if testEngine.piStat.offsetBin:
-        # Set the axes once offset has changed
-        # set lower limit to 110% of the offset
-        #h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
-        #a.axes.set_ylim(-h,h)
-        a.axes.set_ylim(-20,2)
-        # Reset the offsetBin once it has been checked
-        #testEngine.piStat.offsetBin = False
-    if testEngine.piStat.state==testEngine.dc.States.Demo1:
-        a.plot(xList, yList)
-        a.axes.set_yscale("symlog")
-        a.set_xlabel("Potential")
-        a.set_ylabel("Current")
-    elif linearRegFlag and croppedListXFinal is not None:
-        fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
-        a.plot(xList, yList)
-        a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
-        a.axes.set_yscale("symlog")
-        a.set_xlabel("Potential")
-        a.set_ylabel("Current")
-        a.set_title("Sample data & regression line")
-    elif testEngine.piStat.state==testEngine.dc.States.Idle:
-        a.plot(xList, yList)
-        a.scatter(xCoords,yCoords)
-        a.axes.set_yscale("symlog")
-        a.set_xlabel("Potential")
-        a.set_ylabel("Current")
-        a.set_title("Sample data")
-    #elif testEngine.piStat.state==testEngine.dc.States.Measuring_PD:
-        #a.axes.set_yscale()
-    else:
-        a.plot(xList)
-        a.plot(yList)
+    a.autoscale(False)
+    if len(xList):
+        a.plot(xList,yList)
+        if len(xCoords):
+            a.scatter(xCoords,yCoords)
+        a.axes.set_ylim(min(yList)*1.1,max(yList)*1.1)
+        a.axes.set_xlim(min(xList)*1.1,max(xList)*1.1)
+        a.axes.set_yscale("symlog") # why though?
+    a.set_xlabel("Potential")
+    a.set_ylabel("Current")
+    
+    # if testEngine.piStat.offsetBin:
+    #     # Set the axes once offset has changed
+    #     # set lower limit to 110% of the offset
+    #     #h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
+    #     #a.axes.set_ylim(-h,h)
+    #     a.axes.set_ylim(-20,2)
+    #     # Reset the offsetBin once it has been checked
+    #     #testEngine.piStat.offsetBin = False
+    # if testEngine.piStat.state==testEngine.dc.States.Demo1:
+    #     a.plot(xList, yList)
+    #     a.axes.set_yscale("symlog")
+    #     a.set_xlabel("Potential")
+    #     a.set_ylabel("Current")
+    # elif linearRegFlag and croppedListXFinal is not None:
+    #     fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1).clf
+    #     a.plot(xList, yList)
+    #     a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+    #     a.axes.set_yscale("symlog")
+    #     a.set_xlabel("Potential")
+    #     a.set_ylabel("Current")
+    #     a.set_title("Sample data & regression line")
+    # elif testEngine.piStat.state==testEngine.dc.States.Idle:
+    #     a.plot(xList, yList)
+    #     a.scatter(xCoords,yCoords)
+    #     a.axes.set_yscale("symlog")
+    #     a.set_xlabel("Potential")
+    #     a.set_ylabel("Current")
+    #     a.set_title("Sample data")
+    # #elif testEngine.piStat.state==testEngine.dc.States.Measuring_PD:
+    #     #a.axes.set_yscale()
+    # else:
+    #     a.plot(xList)
+    #     a.plot(yList)
 
 def test2Animate():
     pList, cList = testEngine.piStat.getData()
