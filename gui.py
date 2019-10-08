@@ -11,7 +11,6 @@ from matplotlib import style
 import timeit
 import time
 import numpy as np
-from PIL import Image, ImageTk
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
@@ -108,7 +107,7 @@ class Deploy(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
-    @staticmethod
+
 
     
 
@@ -147,12 +146,6 @@ class SimpleMode(tk.Frame):
         tk.Frame.__init__(self,parent)
         
         #tk.frame.config(bg="white")
-        
-        #latrobeIcon = Image.open("latrobeicon.jpg")
-        #latrobeShowImage = ImageTk.PhotoImage(latrobeIcon)
-
-        #latrobeLabel = tk.label(self, image=latrobeShowImage)
-        #latrobeLabel.place(x=0, y=0)
 
         def updatePlot():
             a.plot(xCoords, yCoords)
@@ -177,11 +170,6 @@ class SimpleMode(tk.Frame):
         canvas.get_tk_widget().place(y=40, x=60)
         seperationLabel = tk.Label(self, background="black")
         seperationLabel.place(x=500, y=0, height=480, width=5)
-        # LTU icon
-        img = ImageTk.PhotoImage(file="latrobeicon.jpg")
-        panel = tk.Label(self, image=img)
-        panel.image = img
-        panel.place(x=515,y=60)
         x1Label = tk.Label(self, text="X1 Value")
         x1Label.place(x=0, y=0)
         x2Label = tk.Label(self, text="X2 Value")
