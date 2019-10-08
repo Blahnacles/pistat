@@ -205,7 +205,7 @@ class ToolBox:
         #timer.start(p) # every p ms
         self.offsetBin = False
         # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
-        self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 1]
+        self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 0]
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
             Runs calibration and  sets up cell
