@@ -68,39 +68,6 @@ def testAnimate(i):
     a.set_xlabel("Potential")
     a.set_ylabel("Current")
     
-    # if testEngine.piStat.offsetBin:
-    #     # Set the axes once offset has changed
-    #     # set lower limit to 110% of the offset
-    #     #h = 1.1*max(testEngine.piStat.potData.potentialOffset,testEngine.piStat.potData.currentOffset)
-    #     #a.axes.set_ylim(-h,h)
-    #     a.axes.set_ylim(-20,2)
-    #     # Reset the offsetBin once it has been checked
-    #     #testEngine.piStat.offsetBin = False
-    # if testEngine.piStat.state==testEngine.dc.States.Demo1:
-    #     a.plot(xList, yList)
-    #     a.axes.set_yscale("symlog")
-    #     a.set_xlabel("Potential")
-    #     a.set_ylabel("Current")
-    # elif linearRegFlag and croppedListXFinal is not None:
-    #     fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1).clf
-    #     a.plot(xList, yList)
-    #     a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
-    #     a.axes.set_yscale("symlog")
-    #     a.set_xlabel("Potential")
-    #     a.set_ylabel("Current")
-    #     a.set_title("Sample data & regression line")
-    # elif testEngine.piStat.state==testEngine.dc.States.Idle:
-    #     a.plot(xList, yList)
-    #     a.scatter(xCoords,yCoords)
-    #     a.axes.set_yscale("symlog")
-    #     a.set_xlabel("Potential")
-    #     a.set_ylabel("Current")
-    #     a.set_title("Sample data")
-    # #elif testEngine.piStat.state==testEngine.dc.States.Measuring_PD:
-    #     #a.axes.set_yscale()
-    # else:
-    #     a.plot(xList)
-    #     a.plot(yList)
 
 def test2Animate():
     pList, cList = testEngine.piStat.getData()
@@ -142,42 +109,19 @@ class Deploy(tk.Tk):
         frame.tkraise()
 
     @staticmethod
-    def testFunction():
-        print("Testing!")
 
     
 
 def getLinearParameters(entryX1,entryX2):
     """Takes two points, and performs a linear regression for all points except the range between x1 & x2"""
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList
-    #Split point data into X and Y
-    #x1,y1 = setPointxy1.split(',')
-    #x2,y2 = setPointxy2.split(',')
 
-    #create array points from data and put into array
-    #find index of user data points
-    #for x, y in zip(xList, yList):
-     #   if(x == int(setPointx1))
-    #        x1Index = xList[x]
-     #       y1Index = yList[y]
-    
-    #indexX1 = xList.index(setPointx1)
-    #indexX2 = xList.index(setPointx2)
 
     xxList = xList[:]
     yyList = yList[:]
     xxList = xxList[::-1]
     yyList = yyList[::-1]
-    # for i in xList:
-    #     if i>entryX1:
-    #         indexX1 = i
-    #         print(indexX1)
-    #         print("one")
-    #     if i>entryX2:
-    #         indexX2 = i
-    #         print(indexX2)
-    #         print("two")
-    #         break
+
     indexX1 = np.abs([xx-entryX1 for xx in xxList]).argmin()
     indexX2 = np.abs([xx-entryX2 for xx in xxList]).argmin()
     xxList = xList[:]
@@ -194,11 +138,7 @@ def getLinearParameters(entryX1,entryX2):
     croppedListY2 = yyList[indexX2:]
     #Append data for Y
     croppedListYFinal = np.concatenate((croppedListY1, croppedListY2))
-    #Calculate linear regression
-    #fit = np.polyfit(croppedListXFinal, croppedListYFinal, 1)
-    #fit_fn = np.poly1d(fit)
-    #Plot the linear Regression
-    #a.plot(croppedListXFinal, np.polyval(fit,croppedListXFinal), 'r-')
+
     linearRegFlag=True
         
 class SimpleMode(tk.Frame):
@@ -234,12 +174,7 @@ class SimpleMode(tk.Frame):
         
         canvas = FigureCanvasTkAgg(f, self)
         canvas.draw()
-        #canvas.get_tk_widget().grid(column=1, row=2)
         canvas.get_tk_widget().place(y=40, x=60)
-        #toolbar = NavigationToolbar2Tk(canvas, self)
-        #toolbar.update()
-        #canvas._tkcanvas.grid(row=2, column=1)
-        #canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         seperationLabel = tk.Label(self, background="black")
         seperationLabel.place(x=500, y=0, height=480, width=5)
         # LTU icon
@@ -306,30 +241,7 @@ class SimpleMode(tk.Frame):
         def getLineParameters():
             global pSelect, xCoords, yCoords
             print(str(pSelect))
-            # if pSelect==2:
-            #     pSelect = 0
-            #     xCoords = []
-            #     yCoords = []
-            #     setLinearRegressionButton.configure(text="Select Data Points")
-            # elif pSelect==1:
-            #     # do n point regression here, similar to the below function - SBL
-            #     # TEAMS-201
-            #     # Enter regression state
-            #     #sLRBcancel.place(x=510,y=260)
-            #     pSelect = 2
-            #     # Reset line details
-            #     setLinearRegressionButton.configure(text="Clear Line")
-            #     sLRBcancel.configure(text="Get Height")
-            #     sLRBcancel.place(x=640,y=280)
-            #     pass
-            # else:
-            #     setLinearRegressionButton.configure(text="0 points selected")
-            #     # Enable point recording
-            #     pSelect = 1
-            #     # Reset point value buffers
-            #     xCoords = []
-            #     yCoords = []
-
+        #error message if points selected is 0, will reset array of values if true
             if pSelect == 0:
                 setLinearRegressionButton.configure(text="0 points selected")
                 xCoords = []
@@ -337,6 +249,7 @@ class SimpleMode(tk.Frame):
                 sLRBcancel.configure(text="Reset Point Selection")
                 sLRBcancel.place(x=650,y=280)
                 pSelect = 1
+        #enables line manipulation buttons if there are more than 0 points
             elif pSelect == 1:
                 sLRBcancel.configure(text="Get Peak Height")
                 setLinearRegressionButton.configure(text="Clear Line")
@@ -346,7 +259,7 @@ class SimpleMode(tk.Frame):
                 yCoords = []
                 pSelect = 0
                 setLinearRegressionButton.configure(text="Select Data Points")
-
+        #function to reset the arrays with line data in it
         def lineCancel():
             global pSelect, xCoords, yCoords
             if pSelect == 2:
@@ -385,13 +298,10 @@ class SimpleMode(tk.Frame):
             maxIndex = np.where(maxHeightY==yL)
             #get value from the index of the max height value
             maxHeightX = xL[maxIndex]
-    
-            #p1 = [maxHeightX, maxHeightY]
-            #p2 = [ix, iy]
-
-            #distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
+            #sort the coordinates
             xCoords, yCoords = zip(*sorted(zip(xCoords,yCoords)))
-            print(xCoords)
+            
+            #finds the two closest points beneath the peak
             for i in range(len(xCoords)):
                 if(xCoords[i] > maxHeightX):
                     x1 = xCoords[i]
@@ -518,42 +428,7 @@ class ExpertMode(tk.Frame):
             entry9Data = entry9.get()
             entry10Data = entry10.get()
 
-class UploadData(tk.Frame):
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
-        #label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
-        #label.pack(pady=10,padx=10)
-        
-        #f = Figure(figsize=(5,5), dpi = 100)
-        #a = f.add_subplot(111)
-        #a.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
-
-        #canvas = FigureCanvasTkAgg(f, self)
-        #canvas.draw()
-        #canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        #button1 = ttk.Button(self, text="Calibrate and go")
-        #button1.pack()
-
-class Test1Mode(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
-        label.grid(column=1, row=1)
-        
-        
-
-        canvas = FigureCanvasTkAgg(f, self)
-        canvas.draw()
-        canvas.get_tk_widget().grid(column=2, row=2)
-
-        toolbar = NavigationToolbar2Tk(canvas, self)
-        toolbar.update()
-        canvas._tkcanvas.grid(column=2, row=2)
-
-        button1 = ttk.Button(self, text="Calibrate and go")
-        button1.grid(column=3, row=3)
 
 
 
