@@ -27,7 +27,15 @@ def dummy():
 def cv():
     # Must lock when changing state
     devLock.acquire()
-    piStat.state = dc.States.IdleInit
+    if piStat.potStat.dev is None:
+        piStat.state = dc.States.IdleInit
+    else:
+        piStat.state = dc.States.CVInit
+    devLock.release()
+
+def runCV():
+    devLock.acquire()
+    piStat.state = dc.States.CVInit
     devLock.release()
 
 def depositionData():

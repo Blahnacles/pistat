@@ -213,9 +213,10 @@ class SimpleMode(tk.Frame):
 
 
         # Connect & calibrate button
-        conButton = ttk.Button(self, text="Initialise CV")
+        conButton = ttk.Button(self, text="Connect Potentiostat")
         conButton.place(x=510, y=240)
-        
+
+
         # Button and UI interaction functions
         def onclick(event):
             global xCoords, yCoords, pSelect
@@ -304,7 +305,7 @@ class SimpleMode(tk.Frame):
             except UnboundLocalError as error:
                 tk.messagebox.showerror("Peak calculation error","The given line must pass under the peak current value")
                 
-            return maxHeightY - yD 
+            return maxHeightY - yD
         
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
