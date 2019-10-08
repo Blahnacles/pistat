@@ -279,8 +279,8 @@ class SimpleMode(tk.Frame):
         def calcHeight():
         
             global xList, yList, xCoords, yCoords
-            xL = xList[:]
-            yL = yList[:]
+            xL = np.asarray(xList)
+            yL = np.asarray(yList)
             #Gets max value from array
             maxHeightY = max(yL)
             #get the index of the max value for x
