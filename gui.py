@@ -305,6 +305,7 @@ class SimpleMode(tk.Frame):
         cid = f.canvas.mpl_connect('button_press_event', onclick)
         def getLineParameters():
             global pSelect, xCoords, yCoords
+            print(str(pSelect))
             if pSelect==2:
                 pSelect = 0
                 xCoords = []
@@ -317,7 +318,7 @@ class SimpleMode(tk.Frame):
                 pSelect = 2
                 # Reset line details
                 setLinearRegressionButton.configure(text="Clear Line")
-                sLRBcancel.place_forget()
+                sLRBcancel.configure(text="Get Height")
                 pass
             else:
                 setLinearRegressionButton.configure(text="0 points selected")
@@ -329,9 +330,13 @@ class SimpleMode(tk.Frame):
                 sLRBcancel.place(x=640,y=280)
         def lineCancel():
             global pSelect
-            pSelect = 0
-            sLRBcancel.place_forget()
-            setLinearRegressionButton.configure(text="Select Data Points")
+            if pSelect == 2:
+                h = calcHeight()
+                tk.messagebox.showinfo("Peak height calculation","Peak height: "+format(1000*h[0],"f")+" mA")
+            else:
+                pSelect = 0
+                sLRBcancel.place_forget()
+                setLinearRegressionButton.configure(text="Select Data Points")
         def getVoltage():
             upVolt = upperScale.get()
             lowVolt = lowerScale.get()
@@ -344,39 +349,38 @@ class SimpleMode(tk.Frame):
                 tk.messagebox.showinfo("Voltage Set", "Voltage successfully set - floor: "+str(a)+"V, ceiling: "+str(b)+"V")
         
         def calcHeight():
-		
-		global xList, yList, xCoords, yCoords
+        
+            global xList, yList, xCoords, yCoords
+            xL = xList[:]
+            yL = yList[:]
+            #Gets max value from array
+            maxHeightY = max(yL)
+            #get the index of the max value for x
+            maxIndex = np.where(maxHeightY==yL)
+            #get value from the index of the max height value
+            maxHeightX = xL[maxIndex]
+    
+            #p1 = [maxHeightX, maxHeightY]
+            #p2 = [ix, iy]
 
-		#Gets max value from array
-		maxHeightX = max(xList)
-
-		#get the index of the max value for x
-	
-		maxHeightXIndex = xList.index(maxHeightX)
-
-		#get value from the index of the max height value
-
-		maxHeightY = yList[maxHeightXIndex]
-	
-		#p1 = [maxHeightX, maxHeightY]
-		#p2 = [ix, iy]
-
-		#distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
-
-		for i in range(len(xCoords))
-			if(xCoords[i] > maxHeightX)
-				x1 = xCoords[i]
-				y1 = yCoords[i]
-				x2 = xCoords[i-1]
-				y2 = yCoords[i-1]
-
-		m = y2 - y1 / x2 - x1
-
-		c = y1 - m * x1
-
-		yD = maxHeightX * m + c
-
-		return maxHeightY - yD 
+            #distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
+            xCoords, yCoords = zip(*sorted(zip(xCoords,yCoords)))
+            print(xCoords)
+            for i in range(len(xCoords)):
+                if(xCoords[i] > maxHeightX):
+                    x1 = xCoords[i]
+                    y1 = yCoords[i]
+                    x2 = xCoords[i-1]
+                    y2 = yCoords[i-1]
+                    break                
+            try:
+                m = (y2 - y1) / (x2 - x1)
+                c = y1 - m * x1
+                yD = maxHeightX * m + c
+            except UnboundLocalError as error:
+                tk.messagebox.showerror("Peak calculation error","Error - the given line must pass under the peak current value")
+                
+            return maxHeightY - yD 
         
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
