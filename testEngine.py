@@ -29,14 +29,13 @@ def cv():
     devLock.acquire()
     if piStat.potStat.dev is None:
         piStat.state = dc.States.IdleInit
+        devLock.release()
+        return True
     else:
         piStat.state = dc.States.CVInit
-    devLock.release()
+        devLock.release()
+        return False
 
-def runCV():
-    devLock.acquire()
-    piStat.state = dc.States.CVInit
-    devLock.release()
 
 def depositionData():
 	"""return the deposition data, or to return an

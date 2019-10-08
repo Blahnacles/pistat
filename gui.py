@@ -306,11 +306,15 @@ class SimpleMode(tk.Frame):
                 tk.messagebox.showerror("Peak calculation error","The given line must pass under the peak current value")
                 
             return maxHeightY - yD
+
+        def cv(self):
+            if(testEngine.cv()):
+                conButton.configure(text="Run CV")
         
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
         buttonExpertMode.configure(command=lambda: controller.show_frame(ExpertMode))
-        conButton.configure(command=lambda: testEngine.cv())
+        conButton.configure(command=lambda: cv())
         setLinearRegressionButton.configure(command=lambda: getLineParameters())
         calibrateButton.configure(command=lambda: testEngine.dummy())
         sLRBcancel.configure(command=lambda:lineCancel())
