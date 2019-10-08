@@ -308,12 +308,7 @@ class SimpleMode(tk.Frame):
             return maxHeightY - yD
 
         def cv():
-            if(testEngine.piStat.potStat.dev is None):
-                conButton.configure(text="Connecting...")
-            else:
-                conButton.configure(text="Running...")
-            if(testEngine.cv()):
-                conButton.configure(text="Run CV")
+            testEngine.cv()
         
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
