@@ -29,6 +29,8 @@ class GpsPoller(threading.Thread):
         self.gpsp = GpsPoller()  # create the thread
         try:
             self.gpsp.start()  # start it up
+        except:
+            pass
 
     def pollGPSv1(self):
         time.sleep(5)
