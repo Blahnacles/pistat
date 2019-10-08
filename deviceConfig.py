@@ -6,7 +6,43 @@ from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
 from datetime import datetime
 import pandas
-# comment here
+
+# keenans stuff:
+import sqlite3
+import gpsd
+from gps import *
+from time import *
+import time
+import threading
+class GpsPoller(threading.Thread):
+    """Keenan gps class"""
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.gpsd = gps(mode=WATCH_ENABLE)  # starting the stream of info
+        self.running = True  # setting the thread running to true
+    
+    def run(self):
+        while self.running:
+            self.gpsd.next()  # this will continue to loop and grab EACH set of gpsd info to clear the buffer
+    
+    def initGPSv1(self):
+        self.gpsp = GpsPoller()  # create the thread
+        try:
+            self.gpsp.start()  # start it up
+
+    def pollGPSv1(self):
+        time.sleep(5)
+        return  self.gpsd.fix.latitude, self.gpsd.fix.longitude, self.gpsd.utc, self.gpsd.fix.time, self.gpsd.fix.altitude, self.gpsd.fix.eps, self.gpsd.fix.epx, self.gpsd.fix.epv, self.gpsd.fix.ept, self.gpsd.fix.speed,self.gpsd.fix.climb, self.gpsd.fix.track, self.gpsd.fix.mode, self.gpsd.satellites
+    def initGPSv2(self):
+        gpsd.connect()
+
+    def pollGPSv2(self):
+        time.sleep(5)
+        gpsPacket = gpsd.get_current()
+        return gpsPacket
+        #return  self.gpsd.fix.latitude, self.gpsd.fix.longitude, self.gpsd.utc, self.gpsd.fix.time, self.gpsd.fix.altitude, self.gpsd.fix.eps, self.gpsd.fix.epx, self.gpsd.fix.epv, self.gpsd.fix.ept, self.gpsd.fix.speed,self.gpsd.fix.climb, self.gpsd.fix.track, self.gpsd.fix.mode, self.gpsd.satellites
+
+
 
 class States:
     """
@@ -90,12 +126,61 @@ class GraphData:
         except Exception as e:
             print(e)
 
-    #def idleInit(self):
-    #    """
-    #    Prep the graph, initialisation goes here
-    #    ends by changing to continous update state.
-    #    """
-    #    self.state = States.Idle
+    ####### DATA STORAGE CODE ########        
+    """Keenan's SQL code below"""
+    def exportToSQLITE(self):
+        conn = sqlite3.connect('piStat.db')
+        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
+        for i in range(len(list(self.rawPotentialData))):
+            c1 = list(self.rawPotentialData)[i]
+            c2 = list(self.rawCurrentData)[i]
+            sqlStatement += '(%d, %f, %f),' % (i, c1, c2)
+        sqlStatement = sqlStatement[:-1] + ';'
+        c = conn.cursor()
+        c.execute(sqlStatement)
+        conn.commit()
+        conn.close()
+
+    def exportRawPotentialDataToFile(self):
+        with open('rawPotentialData.csv', 'w') as outfile:
+            for row in list(self.rawPotentialData):
+                outfile.write('%f\n' % row)
+
+    def exportArrayDataToFile(filename, dataArray):
+        '''
+        Exports data to a csv file
+        :param dataArray: must be a list of tuples. Each tuple contains 2 data.
+        :return:
+        '''
+        i = 0
+        with open(filename, 'w') as outfile:
+            outfile.write('index,potential,current\n')
+            for row in list(dataArray):
+                outfile.write('%d,%f,%f\n' % (i, row[0], row[1]))
+                i += 1
+
+    def exportArrayDataToSQLITE(DBfilename, dataArray):
+        '''
+        Exports data to a csv file
+        :param dataArray: must be a list of tuples. Each tuple contains 2 data.
+        :return:
+        '''
+        conn = sqlite3.connect(DBfilename)
+        sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
+
+        for i in range(len(list(dataArray))):
+            c1 = dataArray[i][0]
+            c2 = dataArray[i][1]
+            sqlStatement += '(%d, %f, %f),' % (i, c1, c2)
+        sqlStatement = sqlStatement[:-1] + ';'
+        c = conn.cursor()
+        c.execute(sqlStatement)
+        conn.commit()
+        
+    def exportRawCurrentDataToFile( self):
+        with open('rawCurrentData.csv', 'w') as outfile:
+            for row in list( self.rawCurrentlData):
+                outfile.write( '%f\n' % row )
     
     
 
