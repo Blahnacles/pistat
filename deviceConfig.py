@@ -11,8 +11,6 @@ import pandas
 import sqlite3
 import gpsd
 from gps import *
-from time import *
-import time
 import threading
 class GpsPoller(threading.Thread):
     """Keenan gps class"""
@@ -61,7 +59,8 @@ class States:
 
 
 class GraphData:
-    """ Holds data read from the potentiostat """
+    """ Holds details of recorded data
+        In """
     def __init__(self):
         self.potentialOffset = 0
         self.currentOffset = 0
@@ -209,24 +208,22 @@ class ToolBox:
         self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 1]
     def connect_disconnect_usb(self):
         """Toggle device between connected & disconnected
+            Runs calibration and  sets up cell
+            Returns true if connect successful, false if disconnect successful
+            Returns None if error encountered
         """
-        # Refactored SBL 08/05/2019
-        # Returns False if disconnect successful, and True if connect succesful
-        # Returns None if connect/disconnect failed
-        # DISCONNECT:
+        # If object exists, disconnect
         if self.potStat.dev is not None:
             usb.util.dispose_resources(self.potStat.dev)
             self.potStat.dev = None
             self.state = States.NotConnected
-            # TODO Device disconnected msg
             return False
-        # CONNECT:
+        # Otherwise, connect
         else:
             # Create the device object using the vid & pid
             self.potStat.dev = usb.core.find(idVendor=int(self.potStat.vid, 0), idProduct=int(self.potStat.pid, 0))
             if self.potStat.dev is not None:
                 # If connection successful, get info & setup
-                # TODO Usb interface connected msg
                 try:
                     self.potStat.dac_calibrate()
                     self.potStat.get_dac_settings()
@@ -241,6 +238,8 @@ class ToolBox:
                     pass # In case device is not yet calibrated
 
     def dataRead(self):
+        """Access and read the live data values
+        """
         potential, current = self.potStat.readPotentialCurrent()
         shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
