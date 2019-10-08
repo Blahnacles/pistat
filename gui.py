@@ -306,37 +306,63 @@ class SimpleMode(tk.Frame):
         def getLineParameters():
             global pSelect, xCoords, yCoords
             print(str(pSelect))
-            if pSelect==2:
-                pSelect = 0
-                xCoords = []
-                yCoords = []
-                setLinearRegressionButton.configure(text="Select Data Points")
-            elif pSelect==1:
-                # do n point regression here, similar to the below function - SBL
-                # TEAMS-201
-                # Enter regression state
-                pSelect = 2
-                # Reset line details
-                setLinearRegressionButton.configure(text="Clear Line")
-                sLRBcancel.configure(text="Get Height")
-                pass
-            else:
+            # if pSelect==2:
+            #     pSelect = 0
+            #     xCoords = []
+            #     yCoords = []
+            #     setLinearRegressionButton.configure(text="Select Data Points")
+            # elif pSelect==1:
+            #     # do n point regression here, similar to the below function - SBL
+            #     # TEAMS-201
+            #     # Enter regression state
+            #     #sLRBcancel.place(x=510,y=260)
+            #     pSelect = 2
+            #     # Reset line details
+            #     setLinearRegressionButton.configure(text="Clear Line")
+            #     sLRBcancel.configure(text="Get Height")
+            #     sLRBcancel.place(x=640,y=280)
+            #     pass
+            # else:
+            #     setLinearRegressionButton.configure(text="0 points selected")
+            #     # Enable point recording
+            #     pSelect = 1
+            #     # Reset point value buffers
+            #     xCoords = []
+            #     yCoords = []
+
+            if pSelect == 0:
                 setLinearRegressionButton.configure(text="0 points selected")
-                # Enable point recording
-                pSelect = 1
-                # Reset point value buffers
                 xCoords = []
                 yCoords = []
-                sLRBcancel.place(x=640,y=280)
+                sLRBcancel.configure(text="Reset Point Selection")
+                sLRBcancel.place(x=650,y=280)
+                pSelect = 1
+            elif pSelect == 1:
+                sLRBcancel.configure(text="Get Peak Height")
+                setLinearRegressionButton.configure(text="Clear Line")
+                pSelect = 2
+            elif pSelect == 2:
+                xCoords = []
+                yCoords = []
+                pSelect = 0
+                setLinearRegressionButton.configure(text="Select Data Points")
+
         def lineCancel():
-            global pSelect
+            global pSelect, xCoords, yCoords
             if pSelect == 2:
                 h = calcHeight()
                 tk.messagebox.showinfo("Peak height calculation","Peak height: "+format(1000*h[0],"f")+" mA")
+                setLinearRegressionButton.configure(text="Select Data Points")
+                xCoords = []
+                yCoords = []
+                pSelect = 0
             else:
                 pSelect = 0
                 sLRBcancel.place_forget()
                 setLinearRegressionButton.configure(text="Select Data Points")
+                xCoords = []
+                yCoords = []
+                pSelect = 0
         def getVoltage():
             upVolt = upperScale.get()
             lowVolt = lowerScale.get()
@@ -378,7 +404,7 @@ class SimpleMode(tk.Frame):
                 c = y1 - m * x1
                 yD = maxHeightX * m + c
             except UnboundLocalError as error:
-                tk.messagebox.showerror("Peak calculation error","Error - the given line must pass under the peak current value")
+                tk.messagebox.showerror("Peak calculation error","The given line must pass under the peak current value")
                 
             return maxHeightY - yD 
         
