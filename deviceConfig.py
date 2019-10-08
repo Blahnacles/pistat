@@ -348,10 +348,7 @@ class ToolBox:
             lock.release()
             print("Current voltage input:",voltage)
             if voltage == None:
-                print("Commencing Deposition")
-                self.potData.clearData()
-                self.potData.timeStamp = datetime.now()
-                self.potData.lastTime= datetime.now()
+                print("CV complete")
                 lock.acquire()
                 self.state = States.Idle
                 lock.release()
