@@ -14,7 +14,6 @@ import numpy as np
 LARGE_FONT= ("Verdana", 12)
 
 style.use("ggplot")
-
 f = Figure(figsize=(4.3,4), dpi = 100, tight_layout=True)
 a = f.add_subplot(111)
 global xList
@@ -32,7 +31,7 @@ global pSelect
 xCoords = []
 yCoords = []
 pSelect = 0
-global selX, selY
+global selX, selY, win
 selX = []
 selY = []
 
@@ -45,9 +44,10 @@ lastRead = firstRead
 tSum = lastRead
 ani = None
 
+win = None
 
 def testAnimate(i):
-    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList, pSelect
+    global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList, pSelect, win
     xList, yList = testEngine.getData()
     a.clear()
     a.autoscale(False)
@@ -64,6 +64,20 @@ def testAnimate(i):
         a.axes.set_ylim(miny-(maxy-miny)*0.1, maxy)
         a.axes.set_xlim(min(xList)*1.1,max(xList)*1.1)
         #a.axes.set_yscale("symlog") # why though?
+    s = testEngine.getState()
+    if s == testEngine.dc.States.IdleInit:
+        # Connecting:
+        win = Toplevel(root)
+        win.transient()
+        win.title("Connecting")
+    elif s == testEngine.dc.States.zOffset and win is not None:
+        # Calibrating
+        win.title("Calibrating")
+    elif s == testEngine.dc.States.Idle and win is not None:
+        # Destroy window
+        win.destroy()
+        win = None
+
     a.set_xlabel("Potential")
     a.set_ylabel("Current")
     
@@ -141,10 +155,9 @@ def getLinearParameters(entryX1,entryX2):
     linearRegFlag=True
         
 class SimpleMode(tk.Frame):
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        
+        global f
         #tk.frame.config(bg="white")
 
         def updatePlot():
@@ -215,7 +228,6 @@ class SimpleMode(tk.Frame):
         # Connect & calibrate button
         conButton = ttk.Button(self, text="Connect Potentiostat")
         conButton.place(x=510, y=240)
-
 
         # Button and UI interaction functions
         def onclick(event):

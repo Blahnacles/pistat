@@ -19,6 +19,12 @@ def dToggle():
         lock.acquire()
         piStat.state = dc.States.Demo1
         lock.release()
+    
+def getState():
+    lock.acquire()
+    s = piStat.state
+    lock.release()
+    return s
 
 def dummy():
     piStat.state = dc.States.Demo1
