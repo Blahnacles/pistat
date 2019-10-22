@@ -320,7 +320,10 @@ class SimpleMode(tk.Frame):
             return maxHeightY - yD
 
         def cv():
-            testEngine.cv()
+            res = testEngine.cv()
+            if res == 0:
+                tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
+
         
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
