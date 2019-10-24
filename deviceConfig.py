@@ -1,11 +1,22 @@
-import usb.core, usb.util
+"""
+TEAMS CSE3PRB
+PiStat - Minituarised PotentioStat
+Team members:
+    Luke Gidley - 18089236; Simon Laffan 18774937; Keenan Saleh - 19529401;
+    Kush Shah - 19548278; Rihtvik Sharma - 18851514
+deviceConfig.py manages connection with the potentiostat through usb. 
+takes commands from the testEngine to manage this connection, run cyclic voltammetry,
+and set parameters on the device. Also manages data storage and access.
+"""
+
+import usb.core, usb.util # Libraries for usb interaction
 import numpy as np
 import collections
 import random
 from pyqtgraph.Qt import QtCore, QtGui
 from time import sleep
 from datetime import datetime
-import pandas
+import pandas # python excel interaction library
 
 # keenans stuff:
 import sqlite3
@@ -13,7 +24,8 @@ import gpsd
 from gps import *
 import threading
 class GpsPoller(threading.Thread):
-    """Keenan gps class"""
+    """Keenan gps class
+    Author - Keenan Saleh"""
     def __init__(self):
         threading.Thread.__init__(self)
         self.gpsd = gps(mode=WATCH_ENABLE)  # starting the stream of info
@@ -60,27 +72,29 @@ class States:
 
 class GraphData:
     """ Holds details of recorded data
-        In """
+    Measurement data is stored in two collections - potentialData, and currentData
+    Also stores current range device parameter
+    Created by Simon Laffan"""
     def __init__(self):
         self.potentialOffset = 0
         self.currentOffset = 0
-        self.rawPotentialData = collections.deque(maxlen=200)
         self.potentialData = collections.deque(maxlen=200)
-        self.rawCurrentData = collections.deque(maxlen=200)
         self.currentData = collections.deque(maxlen=200)
-        self.rawPotentialData.append(0)
-        self.rawCurrentData.append(0.5)
-        self.currentRange = b'RANGE 1'
+        self.potentialData.append(0)
+        self.currentData.append(0)
+        self.currentRange = b'RANGE 1' # current ranging - must be set to the correct order of magnitude to eliminate noise
+        # 2uA range - RANGE 1; 200uA range - RANGE 2; 20mA range - RANGE 3
         self.timeStamp = None # to hold start time for sweep data
         self.lastTime = None
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
         Used to be called zero_offset, offset_changed_callback omitted as it
-        is a GUI related function."""
+        is a GUI related function.
+        Author - Simon Laffan"""
         # Screw these two lines, has to be a better way - SBL
-        self.potentialOffset = int(round(-np.average(list(self.rawPotentialData))))
-        self.currentOffset = int(round(-np.average(list(self.rawCurrentData))))
+        self.potentialOffset = int(round(-np.average(list(self.potentialData))))
+        self.currentOffset = int(round(-np.average(list(self.currentData))))
 
     def sweepCalc(self, dT, uV, vV, uBound, lBound,rate,cycles):
         """Return the potential after a given time differential along a cv ramp
@@ -90,6 +104,7 @@ class GraphData:
         uBound (V): voltage ceiling
         lBound (V): voltage floor
         scanrate (V/s): rate by which the voltage should vary with respect to time
+        Author - Simon Laffan, ported from preexisting potentiostat library
         """
         phase1 = uBound - uV # Potential to traverse in first stage
         phase2 = (uBound-lBound)*2.*cycles
@@ -112,13 +127,13 @@ class GraphData:
         else:
             return None
     def clearData(self):
-        self.rawPotentialData.clear()
-        self.rawCurrentData.clear()
+        """Resets data set. Used when new measurement is commenced, or when calibration is complete"""
         self.currentData.clear()
         self.potentialData.clear()
         print("data reset!")
     def loadData(self,filename):
-        # loads potential/current data from a given .csv file
+        """loads potential/current data from a given .csv file
+        file should be stored in current directory"""
         try:
             data = pandas.read_csv(filename)
             self.potentialData = data.values[:,0]
@@ -130,11 +145,12 @@ class GraphData:
     ####### DATA STORAGE CODE ########        
     """Keenan's SQL code below"""
     def exportToSQLITE(self):
+        """Author - Keenan Saleh"""
         conn = sqlite3.connect('piStat.db')
         sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
-        for i in range(len(list(self.rawPotentialData))):
-            c1 = list(self.rawPotentialData)[i]
-            c2 = list(self.rawCurrentData)[i]
+        for i in range(len(list(self.potentialData))):
+            c1 = list(self.potentialData)[i]
+            c2 = list(self.currentData)[i]
             sqlStatement += '(%d, %f, %f),' % (i, c1, c2)
         sqlStatement = sqlStatement[:-1] + ';'
         c = conn.cursor()
@@ -143,8 +159,9 @@ class GraphData:
         conn.close()
 
     def exportRawPotentialDataToFile(self):
+        """Author - Keenan Saleh"""
         with open('rawPotentialData.csv', 'w') as outfile:
-            for row in list(self.rawPotentialData):
+            for row in list(self.potentialData):
                 outfile.write('%f\n' % row)
 
     def exportArrayDataToFile(filename, dataArray):
@@ -152,6 +169,7 @@ class GraphData:
         Exports data to a csv file
         :param dataArray: must be a list of tuples. Each tuple contains 2 data.
         :return:
+        Author - Keenan Saleh
         '''
         i = 0
         with open(filename, 'w') as outfile:
@@ -165,6 +183,7 @@ class GraphData:
         Exports data to a csv file
         :param dataArray: must be a list of tuples. Each tuple contains 2 data.
         :return:
+        """Author - Keenan Saleh"""
         '''
         conn = sqlite3.connect(DBfilename)
         sqlStatement = 'INSERT INTO GRAPHDATA  VALUES '
@@ -180,7 +199,7 @@ class GraphData:
         
     def exportRawCurrentDataToFile( self):
         with open('rawCurrentData.csv', 'w') as outfile:
-            for row in list( self.rawCurrentlData):
+            for row in list( self.currentlData):
                 outfile.write( '%f\n' % row )
     
     
@@ -188,9 +207,16 @@ class GraphData:
 
     
 class ToolBox:
-    """Holds generic potentioStat mgmt functionality & data"""
-    ### Toolbox - a compilation of PiStat generic functions
-    ### Ported SBL 08/05/2019
+    """ ToolBox class is a compilation of PiStat low level functionality.
+    Holds generic potentioStat mgmt functionality & data
+    Key methods include:
+    connectDisconnectUsb() -> connection with the device
+    dataRead() -> collect live i&v values from device
+    action() -> the state machine, managing order of operations
+
+    The measurement parameters are stored in self.params in the following format:
+    [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
+    ToolBox created by Simon Laffan"""
 
     def __init__(self, potStat, potData, debugFlag=False):
         self.potStat = potStat
@@ -206,11 +232,12 @@ class ToolBox:
         self.offsetBin = False
         # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
         self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 0]
-    def connect_disconnect_usb(self):
+    def connectDisconnectUsb(self):
         """Toggle device between connected & disconnected
             Runs calibration and  sets up cell
             Returns true if connect successful, false if disconnect successful
             Returns None if error encountered
+            Author - Simon Laffan, ported from previous library
         """
         # If object exists, disconnect
         if self.potStat.dev is not None:
@@ -239,39 +266,33 @@ class ToolBox:
 
     def dataRead(self):
         """Access and read the live data values
+        Adds the data values to the end of the arrays, performing relevant conversions to floats.
+        Author - Simon Laffan
         """
         potential, current = self.potStat.readPotentialCurrent()
         shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
-        # TODO DELETE THIS
-        # THIS IS BAD PRACTICE
-        # COMPENSATING FOR TEAMS-219, REMOVE THIS LINE IF THE BUG HAS BEEN FIXED
-        # LIKELY CAUSE IS MISCALCULATION OF UNDERFLOW IN twoCompDec
+        # Handle overflow
         if potential<-8:
             potential+=16
-        # YEAH THAT BLOCK ABOVE. SHOULD NOT BE THERE - Simon Laffan 2019/09/15
         print("v =",potential)
         print("i =",current)
-        self.potData.rawPotentialData.append(potential)
         self.potData.potentialData.append(potential)
-        self.potData.rawCurrentData.append(current)
         if self.potData.currentRange == b'RANGE 3':
             current *= 1e3
         self.potData.currentData.append(current)
-        
-
-    def demo1Init(self):
-        """Initialises the system for non-device demo data"""
-        self.state = States.Demo1
 
     def action(self,lock):
-        """State machine for regular cyclic voltammetry operation. Added 06/08/2019 SBL"""
+        """State machine for regular cyclic voltammetry operation. Added 06/08/2019 SBL
+        Performs relevant device and data operations given sequence in state machine.
+        See SMD for details on state definitions and operations
+        Author - Simon Laffan"""
         s = self.state
         if s == States.IdleInit:
             # IdleInit means a connection to the device has not been made
-            if not self.connect_disconnect_usb():
+            if not self.connectDisconnectUsb():
                 # If connection fails, try every 5 seconds
                 print("error: failed to connect")
                 lock.acquire()
@@ -405,82 +426,20 @@ class ToolBox:
             self.state = States.Idle
             lock.release()
         return 0.1
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-    def testAction(self,lock):
-        """demo action function, changed from action to testAction 06/08/2019
-        defunct in future release, new demo to be made for completed UI
-        returns time to sleep for"""
-        # Why doesnt this language implement switch-case????    
-        s = self.state
-        if s == States.Demo1:
-            self.demo1DataRead()
-            return 0.2
-        elif s == States.IdleInit:
-            self.connect_disconnect_usb()
-            print("idleinit")
-            self.state = States.zOffset    
-        elif s == States.zOffset:
-            # do 50 reads, then offset data
-            if len(self.potData.rawCurrentData) < 150:
-                self.dataRead()
-            else:
-                self.potData.zeroOffset()
-                print("------------------------------------------")
-                print("Offset Buffer - Voltage",self.potData.potentialOffset,"Current",self.potData.currentOffset)
-                print("------------------------------------------")
-                self.state = States.Demo2
-                self.offsetBin = True
-                # Turn cell on after offset created
-                self.potStat.setCellStatus(True)
-                # Reset data sets
-                self.potData.rawCurrentData.clear()
-                self.potData.rawPotentialData.clear()
-        elif s == States.Demo2:
-            self.dataRead()
-        elif s == States.Idle:
-            self.dataRead()
-        elif s == States.NotConnected:
-            return 0
-        return 0.1
-
-
-    def demo1DataRead(self):
-        """Adds 1 pseudo-random datapoint when called"""
-        #potential = 1e-100*random.randint(0,100)
-        if self.potData.rawPotentialData[-1] <=200:
-            current = self.potData.rawCurrentData[-1] + 1e-2*random.randint(-10,10)
-            if current <0 or current > 1:
-                current = self.potData.rawCurrentData[-1]
-            potential = self.potData.rawPotentialData[-1] + 1
-            self.potData.rawPotentialData.append(potential)
-            self.potData.rawCurrentData.append(current)
-        else:
-            self.state = States.NotConnected
 
     def getData(self):
-        """Returns plottable data"""
-        return self.potData.rawPotentialData, self.potData.rawCurrentData
+        """Returns plottable data
+        Author - Simon Laffan"""
+        return self.potData.potentialData, self.potData.currentData
     
     def autoRange(self):
         """Uses a selected sample of data to determine an appropriate current range
         from the values: 2uA, 200uA & 20mA.
         Then uses this value to set the desired shunt resistor,
-        and format the data."""
-        size = len(self.potData.rawCurrentData)
-        iVals = list(self.potData.rawCurrentData)[:]
+        and format the data.
+        Author - Simon Laffan, ported from preexisting script"""
+        size = len(self.potData.currentData)
+        iVals = list(self.potData.currentData)[:]
         iMean = abs(sum(iVals)/size)
         if iMean <= 0.002:
             # 2uA range - RANGE 1
@@ -501,7 +460,8 @@ class ToolBox:
     def saveArrays(self):
         """TEAMS-203
         get v & i arrays, metadata and
-        output them to be stored in the DB"""
+        output them to be stored in the DB
+        Author - Rihtvik Sharma"""
         v = self.potData.potentialData
         i = self.potData.currentData
         p = self.params
@@ -513,7 +473,10 @@ class ToolBox:
 
 
 class UsbStat:
-    """Contains PotentioStat configuration settings"""
+    """ Contains PotentioStat configuration settings
+    manages all device level communications through serial ports
+    stores usb device object, and internal settings
+    Created by Simon Laffan"""
     def __init__(self):
         """Initialise the system variables"""
         self.dev = None # usb device object for the pStat
@@ -540,7 +503,8 @@ class UsbStat:
         Then, retrieve dac offset values from the device's flash memory.
         
         Adapted and combined from get_dac_calibration(), get_offset() and 
-        get_shunt_calibration()"""
+        get_shunt_calibration()
+        Author - Simon Laffan"""
 
         # Reading settings from device
         if self.dev is not None:
@@ -552,11 +516,10 @@ class UsbStat:
             self.flashRead(b'SHUNTCALREAD')
     
     def dac_calibrate(self):
-        """Activate the automatic DAC1220 calibration function and retrieve the results."""
+        """Activate the automatic DAC1220 calibration function and retrieve the results.
+        Author - Simon Laffan"""
         self.send_command(b'DACCAL', b'OK')
         self.get_dac_settings()
-        # realistically only need dac_offset & dac_gain from the above
-        # Not worth optimising for in alpha, as it increases cyc complexity by a lot
 
     ########################################
     ######## Input/Output functions ########
@@ -564,7 +527,8 @@ class UsbStat:
     def send_command(self, command_string, expected_response):
         """Send a command string to the USB device and check the response
             Returns True if command was properly received, returns False
-            if not connected or command rejected by device."""
+            if not connected or command rejected by device.
+            Author - Simon Laffan, using previous potentiostat software as guide"""
         if self.dev is not None:
             ######## BEGIN DEVICE ACCESS
             self.dev.write(0x01, command_string) # 0x01 = write address of EP1
@@ -575,6 +539,8 @@ class UsbStat:
         return False
 
     def flashRead(self, designator):
+        """Read flash values from device
+        Author - Simon Laffan, ported using previous software as guide"""
         output = []
         self.dev.write(0x01, designator)
         response = bytes(self.dev.read(0x81,64))
@@ -610,6 +576,7 @@ class UsbStat:
         Collect data from the potentiostat.
         wait_for_adc_read() omitted, as it is explicitly for windows system timing
         Returns raw potential, and raw current.
+        Author - Simon Laffan
         """
         def twoCompDec(msb, midb, lsb):
             """Converts 2s complement to decimal. Now with vastly improved logic"""
@@ -632,14 +599,19 @@ class UsbStat:
             return p,i
         return None, None
     def vOutput(self, value=1):
+        """Set an output voltage for the potentionstat
+        Handle low level interaction for cyclic sweeps etc
+        Author - Simon Laffan"""
+        def ddb(self,v):
+            # Convert a given decimal value to it's byte equivalent
+            # Helper function for vOutput
+            code = 2**19 + int(round(v)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
+            code = np.clip(code, 0, 2**20 - 1) # If the input exceeds the boundaries of the 20-bit integer, clip it
+            byte1 = code // 2**12
+            byte2 = (code % 2**12) // 2**4
+            byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
+            return bytes([byte1,byte2,byte3])
         print("poffset:",self.potential_offset)
-        self.send_command(b'DACSET '+self.ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
+        self.send_command(b'DACSET '+ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
-    def ddb(self,v):
-        # TODO make it pretty
-        code = 2**19 + int(round(v)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
-        code = np.clip(code, 0, 2**20 - 1) # If the input exceeds the boundaries of the 20-bit integer, clip it
-        byte1 = code // 2**12
-        byte2 = (code % 2**12) // 2**4
-        byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
-        return bytes([byte1,byte2,byte3])
+    

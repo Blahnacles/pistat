@@ -1,3 +1,13 @@
+"""
+TEAMS CSE3PRB
+PiStat - Minituarised PotentioStat
+Team members:
+    Luke Gidley - 18089236; Simon Laffan 18774937; Keenan Saleh - 19529401;
+    Kush Shah - 19548278; Rihtvik Sharma - 18851514
+deviceConfig.py manages connection with the potentiostat through usb. 
+takes commands from the testEngine to manage this connection, run cyclic voltammetry,
+and set parameters on the device. Also manages data storage and access.
+"""
 import testEngine
 import tkinter as tk
 from tkinter import ttk
@@ -88,8 +98,6 @@ def test2Animate():
     a.clear()
     a.plot(pList)
 
-def modeToggle():
-    testEngine.dToggle()
 
 
 class Deploy(tk.Tk):
@@ -155,6 +163,8 @@ def getLinearParameters(entryX1,entryX2):
     linearRegFlag=True
         
 class SimpleMode(tk.Frame):
+    """Main screen, handles basic device interactions and simple user settings & params
+    Created by Luke Gidley"""
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
         global f
@@ -289,7 +299,8 @@ class SimpleMode(tk.Frame):
                 tk.messagebox.showinfo("Voltage Set", "Voltage successfully set - floor: "+str(a)+"V, ceiling: "+str(b)+"V")
         
         def calcHeight():
-        
+            """Calulate the height between the peak and the line set by the user
+            Authors - Simon Laffan & Luke Gidley"""
             global xList, yList, xCoords, yCoords
             xL = np.asarray(xList)
             yL = np.asarray(yList)
@@ -320,6 +331,7 @@ class SimpleMode(tk.Frame):
             return maxHeightY - yD
 
         def cv():
+            """Handle interaction for connection, as well as initiate cv sweep"""
             res = testEngine.cv()
             if res == 0:
                 tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
@@ -441,6 +453,7 @@ class ExpertMode(tk.Frame):
 
 app = Deploy()
 ani = animation.FuncAnimation(f, testAnimate, interval=200)
+# Set appropriate screen size for given hardware
 app.geometry("800x480")
 #app.attributes("-zoomed", True)
 app.mainloop()
