@@ -369,13 +369,13 @@ class ExpertMode(tk.Frame):
         colourLabelX = tk.Label(self, background="#326ada", width=57, height=2)
         colourLabelX.grid(column=1, row=6, columnspan=5)
 
-        label1 = tk.Label(self, text = "DAC Offset")
+        label1 = tk.Label(self, text = "Voltage Floor")
         label1.grid(column=1, row = 0, padx=3, pady=3 )
 
-        label1 = tk.Label(self, text = "DAC Gain")
+        label1 = tk.Label(self, text = "Initial Voltage")
         label1.grid(column=1, row = 1, padx=3, pady=3  )
 
-        label1 = tk.Label(self, text = "Pot. Offset")
+        label1 = tk.Label(self, text = "Scan Rate (V/s)")
         label1.grid(column=1, row = 2, padx=3, pady=3  )
 
         label1 = tk.Label(self, text = "Curr. Offset")
@@ -384,13 +384,13 @@ class ExpertMode(tk.Frame):
         label1 = tk.Label(self, text = "R1")
         label1.grid(column=1, row = 4, padx=3, pady=3 )
 
-        label1 = tk.Label(self, text = "R2")
+        label1 = tk.Label(self, text = "Voltage Ceiling")
         label1.grid(column=3, row = 0, padx=3, pady=3  )
 
-        label1 = tk.Label(self, text = "R3")
+        label1 = tk.Label(self, text = "Final Voltage")
         label1.grid(column=3, row = 1, padx=3, pady=3 )
 
-        label1 = tk.Label(self, text = "Current Range")
+        label1 = tk.Label(self, text = "Cycles (zero for ramp)")
         label1.grid(column=3, row = 2, padx=3, pady=3  )
 
         label1 = tk.Label(self, text = "Potential(V)")
@@ -399,53 +399,91 @@ class ExpertMode(tk.Frame):
         label1 = tk.Label(self, text = "PID")
         label1.grid(column=3, row = 4, padx=3, pady=3  )
 
-        entry1 = tk.Entry(self)
-        entry1.grid(column=2, row = 0)
+        voltageFloorEntry = tk.Entry(self)
+        voltageFloorEntry.grid(column=2, row = 0)
 
-        entry2 = tk.Entry(self)
-        entry2.grid(column=2, row = 1)
+        initialVoltageEntry = tk.Entry(self)
+        initialVoltageEntry.grid(column=2, row = 1)
 
-        entry3 = tk.Entry(self)
-        entry3.grid(column=2, row = 2)
-
-        entry4 = tk.Entry(self)
-        entry4.grid(column=2, row = 3)
+        scanRateEntry = tk.Entry(self)
+        scanRateEntry.grid(column=2, row = 2)
 
         entry5 = tk.Entry(self)
         entry5.grid(column=2, row = 4)
 
-        entry6 = tk.Entry(self)
-        entry6.grid(column=4, row = 0)
+        voltageCeilingEntry = tk.Entry(self)
+        voltageCeilingEntry.grid(column=4, row = 0)
 
-        entry7 = tk.Entry(self)
-        entry7.grid(column=4, row = 1)
+        finalVoltageEntry = tk.Entry(self)
+        finalVoltageEntry.grid(column=4, row = 1)
 
-        entry8 = tk.Entry(self)
-        entry8.grid(column=4, row = 2)
-
-        entry9 = tk.Entry(self)
-        entry9.grid(column=4, row = 3)
+        cycleEntry = tk.Entry(self)
+        cycleEntry.grid(column=4, row = 2)
 
         entry10 = tk.Entry(self)
         entry10.grid(column=4, row = 4)
 
+        def setParameters():
+            """Sets user-defined parameters.
+            Only sets initial and final voltages if v floor and v ceiling are defined
+            aborts if any one of the values are unnacceptable"""
+            # TODO value sanitisation, error checking
+            msgString = ""
+            vmin = voltageFloorEntry.get()
+            vmax = voltageCeilingEntry.get()
+            vInitial = initialVoltageEntry.get()
+            vFinal = finalVoltageEntry.get()
+            nCycles = cycleEntry.get()
+            scanRate = scanRateEntry.get()
+            print(scanRate)
+            # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
+            if vmin and vmax:
+                # str to int
+                vmin = float(vmin)
+                vmax = float(vmax)
+                # check for errors in settings
+                if vmax < vmin:
+                    tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
+                    return
+                elif abs(vmin)>2 or abs(vmax)>2:
+                    tk.messagebox.showerror("Voltage setting error", "The voltage parameters must be between -2 and +2 volts. No parameters were set")
+                    return
+                else:
+                    # assign the values
+                    msgString += " [voltage sweep parameters]"
+                    testEngine.piStat.params[2] = vmax
+                    testEngine.piStat.params[3] = vmin
+                if not vInitial:
+                    vInitial = vmin
+                vInitial = float(vInitial)
+                testEngine.piStat.params[0]
+                msgString += " [initial voltage]"
+                if not vFinal:
+                    vFinal = vmax
+                vFinal = float(vFinal)
+                testEngine.piStat.params[1]
+                msgString += " [final voltage]"
+                if abs(vInitial)>2 or abs(vFinal)>2:
+                    tk.messagebox.showerror("Voltage sweep error", "The initial and final voltage settings must be between -2 and +2 volts. No parameters were set")
+                    return
+            if nCycles:
+                nCycles = int(nCycles)
+                msgString += " [number of sweep cycles]"
+                testEngine.piStat.params[5]
+            if scanRate:
+                scanRate = float(scanRate)
+                if scanRate<0.01 or scanRate >1:
+                    tk.messagebox.showerror("Scan rate error", "Scan rate must be between 0.01 and 1 volts per second. No values were set")
+                    return
+                testEngine.piStat.params[4]
+                msgString += " [scan rate]"
+            if msgString:
+                tk.messagebox.showinfo("Values successfully set", "The following settings were altered: "+msgString)
         buttonSimpleMode = ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode))
         buttonSimpleMode.grid(column=6, row=0)
 
-        applyVariables= ttk.Button(self, text="Apply")
+        applyVariables= ttk.Button(self, text="Apply", command=setParameters)
         applyVariables.grid(column=6, row =6)
-        
-        def get_parameters():
-            entry1Data = entry1.get()
-            entry2Data = entry2.get()
-            entry3Data = entry3.get()
-            entry4Data = entry4.get()
-            entry5Data = entry5.get()
-            entry6Data = entry6.get()
-            entry7Data = entry7.get()
-            entry8Data = entry8.get()
-            entry9Data = entry9.get()
-            entry10Data = entry10.get()
 
 
 
