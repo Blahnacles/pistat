@@ -57,6 +57,9 @@ ani = None
 win = None
 
 def testAnimate(i):
+    """Animation function for graph. Run by an animation in root
+    Graphs relevant data depending on device state and user inputs
+    Author: Luke Gidley"""
     global croppedListXFinal, croppedListYFinal, linearRegFlag, xList, yList, pSelect, win
     xList, yList = testEngine.getData()
     a.clear()
@@ -241,6 +244,8 @@ class SimpleMode(tk.Frame):
 
         # Button and UI interaction functions
         def onclick(event):
+            """Gathers data points from user interaction with graph
+            Author: Luke Gidley"""
             global xCoords, yCoords, pSelect
             ix, iy = event.xdata, event.ydata
             if ix is not None and iy is not None and pSelect==1:
