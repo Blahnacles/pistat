@@ -499,12 +499,8 @@ class ExpertMode(tk.Frame):
 
 
             
-        buttonSimpleMode = ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode))
-        buttonSimpleMode.grid(column=6, row=0)
-
-        applyVariables= ttk.Button(self, text="Apply", command=paramSet)
-        applyVariables.grid(column=2, row =3)
-
+        ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode)).grid(column=6, row=0)
+        ttk.Button(self, text="Apply", command=paramSet).grid(column=2, row =3)
         ttk.Button(self, text="Refresh", command=refresh).grid(column=3,row=3)
         ttk.Button(self, text="Reset parameters", command=setDefaults).grid(column=4,row=3)
 
