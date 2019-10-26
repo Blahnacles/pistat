@@ -336,7 +336,6 @@ class SimpleMode(tk.Frame):
             if res == 0:
                 tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
 
-        
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
         buttonExpertMode.configure(command=lambda: controller.show_frame(ExpertMode))
@@ -362,6 +361,9 @@ class ExpertMode(tk.Frame):
         tk.Frame.__init__(self,parent)
         #label = tk.Label(self, text="Potentio Stat", font=LARGE_FONT)
         #label.grid
+        def paramGet(entryField, paramIndex):
+            entryField.delete(0,tk.END)
+            entryField.insert(0, testEngine.piStat.params[paramIndex])
         
         colourLabelY = tk.Label(self, background="#326ada", width=3, height=18)
         colourLabelY.grid(column=0, rowspan=6)
@@ -378,12 +380,6 @@ class ExpertMode(tk.Frame):
         label1 = tk.Label(self, text = "Scan Rate (V/s)")
         label1.grid(column=1, row = 2, padx=3, pady=3  )
 
-        label1 = tk.Label(self, text = "Curr. Offset")
-        label1.grid(column=1, row = 3, padx=3, pady=3  )
-
-        label1 = tk.Label(self, text = "R1")
-        label1.grid(column=1, row = 4, padx=3, pady=3 )
-
         label1 = tk.Label(self, text = "Voltage Ceiling")
         label1.grid(column=3, row = 0, padx=3, pady=3  )
 
@@ -393,97 +389,125 @@ class ExpertMode(tk.Frame):
         label1 = tk.Label(self, text = "Cycles (zero for ramp)")
         label1.grid(column=3, row = 2, padx=3, pady=3  )
 
-        label1 = tk.Label(self, text = "Potential(V)")
-        label1.grid(column=3, row = 3, padx=3, pady=3  )
-
-        label1 = tk.Label(self, text = "PID")
-        label1.grid(column=3, row = 4, padx=3, pady=3  )
-
         voltageFloorEntry = tk.Entry(self)
         voltageFloorEntry.grid(column=2, row = 0)
-
-        initialVoltageEntry = tk.Entry(self)
-        initialVoltageEntry.grid(column=2, row = 1)
-
-        scanRateEntry = tk.Entry(self)
-        scanRateEntry.grid(column=2, row = 2)
-
-        entry5 = tk.Entry(self)
-        entry5.grid(column=2, row = 4)
+        paramGet(voltageFloorEntry, 3)
 
         voltageCeilingEntry = tk.Entry(self)
         voltageCeilingEntry.grid(column=4, row = 0)
+        paramGet(voltageCeilingEntry, 2)
+
+        initialVoltageEntry = tk.Entry(self)
+        initialVoltageEntry.grid(column=2, row = 1)
+        paramGet(initialVoltageEntry, 0)
 
         finalVoltageEntry = tk.Entry(self)
         finalVoltageEntry.grid(column=4, row = 1)
+        paramGet(finalVoltageEntry, 1)
+
+        scanRateEntry = tk.Entry(self)
+        scanRateEntry.grid(column=2, row = 2)
+        paramGet(scanRateEntry, 4)
 
         cycleEntry = tk.Entry(self)
         cycleEntry.grid(column=4, row = 2)
+        paramGet(cycleEntry, 5)
 
-        entry10 = tk.Entry(self)
-        entry10.grid(column=4, row = 4)
-
-        def setParameters():
-            """Sets user-defined parameters.
-            Only sets initial and final voltages if v floor and v ceiling are defined
-            aborts if any one of the values are unnacceptable"""
-            # TODO value sanitisation, error checking
+        def refresh():
+            """Sets the entry values to their backend values
+            Author: Simon Laffan"""
+            paramGet(initialVoltageEntry, 0)
+            paramGet(finalVoltageEntry, 1)
+            paramGet(voltageCeilingEntry, 2)
+            paramGet(voltageFloorEntry, 3)
+            paramGet(scanRateEntry, 4)
+            paramGet(cycleEntry, 5)
+        def setDefaults():
+            """Resets the parameters to default values
+            Gets and sets the entry field values
+            Author: Simon Laffan"""
+            tmp = tk.messagebox.askokcancel(title="Are you sure?",message="The piStat parameters will be reset to their default values, would you like to proceed?")
+            if tmp:
+                testEngine.piStat.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 0]
+                refresh()
+        def paramSet():
+            """Send the values to the device manager
+            Sanitises and checks for validity, and sets parameters
+            Author: Simon Laffan"""
             msgString = ""
-            vmin = voltageFloorEntry.get()
-            vmax = voltageCeilingEntry.get()
-            vInitial = initialVoltageEntry.get()
-            vFinal = finalVoltageEntry.get()
-            nCycles = cycleEntry.get()
-            scanRate = scanRateEntry.get()
-            print(scanRate)
-            # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
-            if vmin and vmax:
-                # str to int
-                vmin = float(vmin)
-                vmax = float(vmax)
-                # check for errors in settings
-                if vmax < vmin:
-                    tk.messagebox.showerror("Floor/Ceiling Error", "The voltage floor should be less than the ceiling")
+            # get the values
+            params = testEngine.piStat.params
+            try:
+                vmin = float(voltageFloorEntry.get())
+                vmax = float(voltageCeilingEntry.get())
+                vInitial = float(initialVoltageEntry.get())
+                vFinal = float(finalVoltageEntry.get())
+                scanRate = float(scanRateEntry.get())
+            except:
+                tk.messagebox.showerror("Number format error", "Voltage and scan rates must be numbers. No settings were altered")
+                return
+            try:
+                nCycles = int(cycleEntry.get())
+            except:
+                tk.messagebox.showerror("Cycle input error", "Number of cycles must be a natural number (including 0). No settings were altered")
+                return
+            # Check for modifications
+            if vmin>vmax:
+                tk.messagebox.showerror("Voltage Floor/Ceiling Error,", "Voltage floor must be less than voltage ceiling. No settings were altered")
+                return
+            if vmin!=params[3]:
+                if abs(vmin)>2:
+                    tk.messagebox.showerror("Voltage Floor Error", "Voltage floor must be between -2 and 2 Volts. No settings were altered")
                     return
-                elif abs(vmin)>2 or abs(vmax)>2:
-                    tk.messagebox.showerror("Voltage setting error", "The voltage parameters must be between -2 and +2 volts. No parameters were set")
+                params[3] = vmin
+                msgString += "[V Floor]"
+            if vmax!=params[2]:
+                if abs(vmax)>2:
+                    tk.messagebox.showerror("Voltage Floor Error", "Voltage floor must be between -2 and 2 Volts. No settings were altered")
                     return
-                else:
-                    # assign the values
-                    msgString += " [voltage sweep parameters]"
-                    testEngine.piStat.params[2] = vmax
-                    testEngine.piStat.params[3] = vmin
-                if not vInitial:
-                    vInitial = vmin
-                vInitial = float(vInitial)
-                testEngine.piStat.params[0]
-                msgString += " [initial voltage]"
-                if not vFinal:
-                    vFinal = vmax
-                vFinal = float(vFinal)
-                testEngine.piStat.params[1]
-                msgString += " [final voltage]"
-                if abs(vInitial)>2 or abs(vFinal)>2:
-                    tk.messagebox.showerror("Voltage sweep error", "The initial and final voltage settings must be between -2 and +2 volts. No parameters were set")
+                params[2] = vmax
+                msgString+=" [V ceiling]"
+            if vInitial!=params[0]:
+                if abs(vInitial)>2:
+                    tk.messagebox.showerror("Start Voltage Error", "Starting voltage must be between -2 and 2 Volts. No settings were altered")
                     return
-            if nCycles:
-                nCycles = int(nCycles)
-                msgString += " [number of sweep cycles]"
-                testEngine.piStat.params[5]
-            if scanRate:
-                scanRate = float(scanRate)
-                if scanRate<0.01 or scanRate >1:
-                    tk.messagebox.showerror("Scan rate error", "Scan rate must be between 0.01 and 1 volts per second. No values were set")
+                params[0] = vInitial
+                msgString+=" [V initial]"
+            if vFinal!=params[1]:
+                if abs(vFinal)>2:
+                    tk.messagebox.showerror("End Voltage Error", "Final voltage must be between -2 and 2 Volts. No settings were altered")
                     return
-                testEngine.piStat.params[4]
-                msgString += " [scan rate]"
+                params[1] = vFinal
+                msgString+=" [V final]"
+            if nCycles!=params[5]:
+                if nCycles<0:
+                    tk.messagebox.showerror("Cycles error", "Number of cycles must be a natural number (including 0). No settings were altered")
+                    return
+                params[5] = nCycles
+                msgString+=" [Cycles]"
+            if scanRate!=params[4]:
+                if scanRate<0.1 or scanRate>1:
+                    tk.messagebox.showerror("Scan rate error", "Scan rate must be between 0.1 and 1 V/s. No settings were altered")
+                    return
+                params[4] = scanRate
+                msgString+=" [Scan rate]"
             if msgString:
                 tk.messagebox.showinfo("Values successfully set", "The following settings were altered: "+msgString)
+            else:
+                tk.messagebox.showinfo("No modifications made", "No parameter settings were altered. Try changing some values!")
+
+
+
+            
         buttonSimpleMode = ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode))
         buttonSimpleMode.grid(column=6, row=0)
 
-        applyVariables= ttk.Button(self, text="Apply", command=setParameters)
-        applyVariables.grid(column=6, row =6)
+        applyVariables= ttk.Button(self, text="Apply", command=paramSet)
+        applyVariables.grid(column=2, row =3)
+
+        ttk.Button(self, text="Refresh", command=refresh).grid(column=3,row=3)
+        ttk.Button(self, text="Reset parameters", command=setDefaults).grid(column=4,row=3)
+
 
 
 
