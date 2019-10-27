@@ -625,7 +625,7 @@ class UsbStat:
         """Set an output voltage for the potentionstat
         Handle low level interaction for cyclic sweeps etc
         Author - Simon Laffan"""
-        def ddb(self,v):
+        def ddb(v):
             # Convert a given decimal value to it's byte equivalent
             # Helper function for vOutput
             code = 2**19 + int(round(v)) # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway

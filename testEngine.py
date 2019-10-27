@@ -45,7 +45,8 @@ def dummy():
 def cv():
     """Two paths
         - either establish connection with device, or
-        - if device connected, begin cyclic voltammetry"""
+        - if device connected, begin cyclic voltammetry
+    Author: Simon Laffan"""
     # Must lock when changing state
     devLock.acquire()
     if piStat.potStat.dev is None:
@@ -59,11 +60,19 @@ def cv():
         devLock.release()
         return 2
 
+def cvCancel():
+    """Immediately cancels the piStat, sends it into idle mode
+    Author: Simon Laffan"""
+    devLock.acquire()
+    piStat.state = dc.States.Idle
+    devLock.release()
+
 
 def depositionData():
 	"""return the deposition data, or to return an
 	appropriate error/exception
-	if the data is not yet available."""
+	if the data is not yet available.
+    Author: Simon Laffan"""
 	
 	devLock.acquire()
 	params, v, i = dc.saveArrays()

@@ -95,12 +95,6 @@ def testAnimate(i):
     a.set_ylabel("Current")
     
 
-def test2Animate():
-    pList, cList = testEngine.piStat.getData()
-
-    a.clear()
-    a.plot(pList)
-
 
 
 class Deploy(tk.Tk):
@@ -242,6 +236,9 @@ class SimpleMode(tk.Frame):
         conButton = ttk.Button(self, text="Connect Potentiostat")
         conButton.place(x=510, y=240)
 
+        cancelButton = ttk.Button(self, text="Reset & Cancel CV")
+        cancelButton.place(x=510, y=280)        
+
         # Button and UI interaction functions
         def onclick(event):
             """Gathers data points from user interaction with graph
@@ -340,6 +337,15 @@ class SimpleMode(tk.Frame):
             res = testEngine.cv()
             if res == 0:
                 tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
+        
+        def cvCancel():
+            if testEngine.getState() != testEngine.dc.States.Idle:
+                tmp = tk.messagebox.askokcancel(title="Are you sure?",message="Cancel the measurement in progress?")
+                if tmp:
+                    testEngine.cvCancel()
+                return
+            tk.messagebox.showinfo(title="Device Idle", message="The potentiostat device manager is already in Idle mode")
+            
 
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
@@ -348,6 +354,7 @@ class SimpleMode(tk.Frame):
         setLinearRegressionButton.configure(command=lambda: getLineParameters())
         calibrateButton.configure(command=lambda: testEngine.dummy())
         sLRBcancel.configure(command=lambda:lineCancel())
+        cancelButton.configure(command=lambda:cvCancel())
 
         
 
