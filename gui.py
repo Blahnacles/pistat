@@ -78,18 +78,9 @@ def testAnimate(i):
         a.axes.set_xlim(min(xList)*1.1,max(xList)*1.1)
         #a.axes.set_yscale("symlog") # why though?
     s = testEngine.getState()
-    if s == testEngine.dc.States.IdleInit:
-        # Connecting:
-        win = Toplevel(root)
-        win.transient()
-        win.title("Connecting")
-    elif s == testEngine.dc.States.zOffset and win is not None:
-        # Calibrating
-        win.title("Calibrating")
-    elif s == testEngine.dc.States.Idle and win is not None:
-        # Destroy window
-        win.destroy()
-        win = None
+    #if s == testEngine.dc.States.IdleInit:
+    #elif s == testEngine.dc.States.zOffset and win is not None:
+    #elif s == testEngine.dc.States.Idle and win is not None:
 
     a.set_xlabel("Potential")
     a.set_ylabel("Current")
@@ -237,7 +228,7 @@ class SimpleMode(tk.Frame):
         conButton.place(x=510, y=240)
 
         cancelButton = ttk.Button(self, text="Reset & Cancel CV")
-        cancelButton.place(x=510, y=300)        
+        cancelButton.place(x=510, y=340)        
 
         # Button and UI interaction functions
         def onclick(event):
@@ -337,6 +328,9 @@ class SimpleMode(tk.Frame):
             res = testEngine.cv()
             if res == 0:
                 tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
+            else:
+                tk.messagebox.showinfo("Connection Successful", "Successfully connected to piStat - the piStat is initialising")
+                conButton.configure(text="Run CV")
         
         def cvCancel():
             if testEngine.getState() != testEngine.dc.States.Idle:
