@@ -237,7 +237,7 @@ class SimpleMode(tk.Frame):
         conButton.place(x=510, y=240)
 
         cancelButton = ttk.Button(self, text="Reset & Cancel CV")
-        cancelButton.place(x=510, y=280)        
+        cancelButton.place(x=510, y=300)        
 
         # Button and UI interaction functions
         def onclick(event):
