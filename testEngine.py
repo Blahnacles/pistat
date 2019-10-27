@@ -52,6 +52,7 @@ def cv():
     if piStat.potStat.dev is None:
         piStat.state = dc.States.IdleInit
         devLock.release()
+        time.sleep(0.5)
         if piStat.potStat.dev is None:
             return 0
         return 1
