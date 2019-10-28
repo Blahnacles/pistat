@@ -27,6 +27,14 @@ def actionThread():
     while 1:
         time.sleep(piStat.action(devLock))
 
+def connectDisconnect():
+    """Establish or destroy connection with the device"""
+    devLock.acquire()
+    piStat.state = dc.States.IdleInit
+    devLock.release()
+    time.sleep(1)
+    return piStat.potStat.dev is not None
+
 def saveCsv(filename):
     """Helper function for potData
     Saves the data in a given file
@@ -49,23 +57,14 @@ def dummy():
     devLock.release()
 
 def cv():
-    """Two paths
-        - either establish connection with device, or
-        - if device connected, begin cyclic voltammetry
+    """If device connected, begin cyclic voltammetry
     Author: Simon Laffan"""
     # Must lock when changing state
     devLock.acquire()
-    if piStat.potStat.dev is None:
-        piStat.state = dc.States.IdleInit
-        devLock.release()
-        time.sleep(0.5)
-        if piStat.potStat.dev is None:
-            return 0
-        return 1
-    else:
+    if piStat.potStat.dev is not None:
         piStat.state = dc.States.CVInit
-        devLock.release()
-        return 2
+    devLock.release()
+    return piStat.potStat.dev is not None
 
 def cvCancel():
     """Immediately cancels the piStat, sends it into idle mode

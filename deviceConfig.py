@@ -642,7 +642,7 @@ class UsbStat:
             byte2 = (code % 2**12) // 2**4
             byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
             return bytes([byte1,byte2,byte3])
-        print("setting voltage: "+value)
+        print("setting voltage: "+str(value))
         self.send_command(b'DACSET '+ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
     

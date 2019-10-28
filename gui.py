@@ -227,13 +227,26 @@ class SimpleMode(tk.Frame):
 
 
         # Connect & calibrate button
-        conButton = ttk.Button(self, text="Connect Potentiostat")
+        conButton = ttk.Button(self,text="Connect/Disconnect")
         conButton.place(x=510, y=240)
+
+        cvButton = ttk.Button(self, text="Start CV")
+        cvButton.place(x=650, y=240)
 
         cancelButton = ttk.Button(self, text="Reset & Cancel CV")
         cancelButton.place(x=510, y=340)        
 
         # Button and UI interaction functions
+        def connectDisconnect():
+            """Establishes/severs connection with usb device
+            Author: Simon Laffan"""
+            res = testEngine.connectDisconnect()
+            if res:
+                tk.messagebox.showinfo("Connection Successful", "Successfully connected to piStat - the piStat is initialising")
+            else:
+                tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
+
+
         def onclick(event):
             """Gathers data points from user interaction with graph
             Author: Luke Gidley"""
@@ -327,13 +340,12 @@ class SimpleMode(tk.Frame):
             return maxHeightY - yD
 
         def cv():
-            """Handle interaction for connection, as well as initiate cv sweep"""
+            """initiate cv sweep"""
             res = testEngine.cv()
-            if res == 0:
-                tk.messagebox.showerror("Connection Error", "Please ensure the device is connected properly. If so, try reseating the usb plug.")
+            if res:
+                tk.messagebox.showinfo("CV has begun", "Press cancel to abort, otherwise please wait for the measurement to complete")
             else:
-                tk.messagebox.showinfo("Connection Successful", "Successfully connected to piStat - the piStat is initialising")
-                conButton.configure(text="Run CV")
+                tk.messagebox.showerror("Connection error", "Try connecting the device first! If this issue persists, reseat the usb connection")
         
         def cvCancel():
             if testEngine.getState() != testEngine.dc.States.Idle:
@@ -360,12 +372,13 @@ class SimpleMode(tk.Frame):
         # Assigning commands to buttons
         voltButton.configure(command=lambda: getVoltage())
         buttonExpertMode.configure(command=lambda: controller.show_frame(ExpertMode))
-        conButton.configure(command=lambda: cv())
+        conButton.configure(command=lambda: connectDisconnect())
         setLinearRegressionButton.configure(command=lambda: getLineParameters())
         calibrateButton.configure(command=lambda: testEngine.dummy())
         sLRBcancel.configure(command=lambda:lineCancel())
         cancelButton.configure(command=lambda:cvCancel())
         saveButton.configure(command=lambda:saveData())
+        cvButton.configure(command=lambda:cv())
 
         
 
