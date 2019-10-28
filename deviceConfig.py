@@ -260,7 +260,7 @@ class ToolBox:
         #timer.start(p) # every p ms
         self.offsetBin = False
         # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
-        self.params = [-0.2, 0.2, 0.2, -0.2, 0.1, 0]
+        self.params = [0., 1., 0., 1., 0.1, 0]
     def connectDisconnectUsb(self):
         """Toggle device between connected & disconnected
             Runs calibration and  sets up cell
@@ -303,14 +303,14 @@ class ToolBox:
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
+        print("v =",potential)
+        print("i =",current)
         # Handle overflow
         if potential<-8:
             potential+=16
         #print("v =",potential)
         #print("i =",current)
         if current<-40:
-            print("v =",potential)
-            print("i =",current)
             current += 50
         self.potData.potentialData.append(potential)
         if self.potData.currentRange == b'RANGE 3':
