@@ -381,6 +381,7 @@ class ToolBox:
                 self.potData.timeStamp = datetime.now()
                 self.potData.lastTime = datetime.now()
                 self.potData.clearData()
+                self.state = States.Measuring_CV
             else:
                 self.cvFlag = True
                 self.potStat.vOutput(value=-0.4) # setting the starting potential
