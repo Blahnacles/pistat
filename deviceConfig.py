@@ -492,7 +492,7 @@ class ToolBox:
         self.potStat.send_command(cRange, b'OK')
         if len(self.potData.currentData)>10:
             self.potData.currentOffset = iMean
-            print(iMean)
+            print("Current Offset is: "+str(iMean))
 
     def saveArrays(self):
         """TEAMS-203
