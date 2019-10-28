@@ -299,12 +299,12 @@ class ToolBox:
         Author - Simon Laffan
         """
         potential, current = self.potStat.readPotentialCurrent()
+        print("v =",potential)
+        print("i =",current)
         shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
-        print("v =",potential)
-        print("i =",current)
         # Handle overflow
         if potential<-8:
             potential+=16
