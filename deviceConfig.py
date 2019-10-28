@@ -284,7 +284,7 @@ class ToolBox:
                     self.potStat.dac_calibrate()
                     self.potStat.get_dac_settings()
                     print("Settings obtained")
-                    self.potStat.setCellStatus(False)
+                    self.potStat.setCellStatus(True)
                     print("Cell Set")
                     self.potStat.send_command(b'POTENTIOSTATIC', b'OK')
                     print("Potentiostatic mode")
@@ -370,6 +370,7 @@ class ToolBox:
             lock.acquire()
             self.state = States.Idle
             lock.release()
+            self.potStat.setCellStatus(False)
         elif s == States.Idle:
             pass
         elif s == States.CVInit:
