@@ -310,7 +310,6 @@ class ToolBox:
         #print("i =",current)
         if current<-40:
             current += 50
-        print("v =",potential)
         print("i =",current)
         print("pOff: ",self.potData.potentialOffset,"  cOff: ",self.potData.currentOffset)
         self.potData.potentialData.append(potential)
@@ -638,6 +637,7 @@ class UsbStat:
         """Set an output voltage for the potentionstat
         Handle low level interaction for cyclic sweeps etc
         Author - Simon Laffan"""
+        print("setting output to ",value)
         def ddb(v):
             # Convert a given decimal value to it's byte equivalent
             # Helper function for vOutput
