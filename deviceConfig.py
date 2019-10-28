@@ -308,10 +308,12 @@ class ToolBox:
             potential+=16
         #print("v =",potential)
         #print("i =",current)
-        if current <-0.1:
+        if abs(current)>2:
             print("v =",potential)
             print("i =",current)
             print(self.params)
+            current = self.potData.currentData.pop()
+            self.potData.currentData.append(current)
         self.potData.potentialData.append(potential)
         if self.potData.currentRange == b'RANGE 3':
             current *= 1e3
