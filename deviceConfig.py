@@ -131,14 +131,11 @@ class GraphData:
         phase3 = abs(vV-uBound)
         sweepVal = rate*dT
         if sweepVal < phase1: # Have not passed first ramp
-            print("phase1, sweepval = ",sweepVal)
             return uV + sweepVal # Therefore simply add the differential to the initial potential
         elif sweepVal < phase1+phase2: # Mid Cycle
-            print("phase2, sweepval = ",sweepVal)
             sweepVal -= phase1
             return lBound + abs((sweepVal)%(2*(uBound-lBound))-(uBound-lBound))
         elif sweepVal < phase1+phase2+phase3:
-            print("phase3, sweepval = ",sweepVal)
             sweepVal -= phase1 + phase2
             if vV > uBound:
                 return uBound + sweepVal
@@ -403,7 +400,6 @@ class ToolBox:
             # calculate appropriate voltage level using given parameters
             voltage = self.potData.sweepCalc(dT, self.params[0], self.params[1], self.params[2], self.params[3], self.params[4], self.params[5])
             lock.release()
-            print("Current voltage input:",voltage)
             if voltage == None:
                 print("CV complete")
                 print(self.params)
@@ -647,7 +643,6 @@ class UsbStat:
             byte2 = (code % 2**12) // 2**4
             byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
             return bytes([byte1,byte2,byte3])
-        print("setting voltage: "+str(value))
         self.send_command(b'DACSET '+ddb(value/8.*2.**19+int(round(self.potential_offset/4.))),b'OK')
 
     
