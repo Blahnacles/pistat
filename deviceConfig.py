@@ -402,6 +402,8 @@ class ToolBox:
             print("Current voltage input:",voltage)
             if voltage == None:
                 print("CV complete")
+                print(self.params)
+                self.potStat.setCellStatus(False)
                 lock.acquire()
                 self.state = States.Idle
                 lock.release()
