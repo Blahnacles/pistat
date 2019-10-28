@@ -261,6 +261,7 @@ class ToolBox:
         self.offsetBin = False
         # params = [initialVoltage, finalVoltage, voltageCeiling, voltageFloor, scanRate, cycles (0 for ramp)]
         self.params = [0., 1., 0., 1., 0.1, 0]
+        self.cvFlag = False
     def connectDisconnectUsb(self):
         """Toggle device between connected & disconnected
             Runs calibration and  sets up cell
@@ -374,26 +375,33 @@ class ToolBox:
         elif s == States.Idle:
             pass
         elif s == States.CVInit:
-            self.potStat.vOutput(value=-0.4) # setting the starting potential
-            self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
-            self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
             self.potStat.setCellStatus(True) # Cell on
-            sleep(0.5)
-            for j in range(10):
+            if self.cvFlag:
+                #skip this stage
+                self.potData.timeStamp = datetime.now()
+                self.potData.lastTime = datetime.now()
+                self.potData.clearData()
+            else
+                self.cvFlag = True
+                self.potStat.vOutput(value=-0.4) # setting the starting potential
+                self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
+                self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
+                sleep(0.5)
+                for j in range(10):
+                    lock.acquire()
+                    self.dataRead()
+                    lock.release()
+                    sleep(0.1)
+                self.autoRange() # autorange after 20 reads
+                self.potData.clearData() # clear data, complete 3 times
+                # debug
+                print("Entering CV measurement phase")
                 lock.acquire()
-                self.dataRead()
+                self.state = States.Measuring_CV
                 lock.release()
-                sleep(0.1)
-            self.autoRange() # autorange after 20 reads
-            self.potData.clearData() # clear data, complete 3 times
-            # debug
-            print("Entering CV measurement phase")
-            lock.acquire()
-            self.state = States.Measuring_CV
-            lock.release()
-            # set timestamp for measurement stage, aids in calculation of dT
-            self.potData.timeStamp = datetime.now()
-            self.potData.lastTime= datetime.now()
+                # set timestamp for measurement stage, aids in calculation of dT
+                self.potData.timeStamp = datetime.now()
+                self.potData.lastTime= datetime.now()
         elif s == States.Measuring_CV:
             dT = datetime.now() - self.potData.lastTime # time differential as datetime obj
             dT = dT.seconds + dT.microseconds * 1e-6 # seconds elapsed, as float
