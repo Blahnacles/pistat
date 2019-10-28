@@ -381,7 +381,7 @@ class ToolBox:
                 self.potData.timeStamp = datetime.now()
                 self.potData.lastTime = datetime.now()
                 self.potData.clearData()
-            else
+            else:
                 self.cvFlag = True
                 self.potStat.vOutput(value=-0.4) # setting the starting potential
                 self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
