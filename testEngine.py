@@ -26,6 +26,12 @@ def actionThread():
     Should be run within a thread object"""
     while 1:
         time.sleep(piStat.action(devLock))
+
+def saveCsv(filename):
+    """Helper function for potData
+    Saves the data in a given file
+    Author: Simon Laffan"""
+    piStat.potData.saveData(filename,piStat.params)
     
 def getState():
     """Return state enum value

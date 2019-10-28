@@ -161,6 +161,15 @@ class GraphData:
             print("data in "+filename+" successfully loaded, first sample: "+str(data.values[1,1]))
         except Exception as e:
             print(e)
+    def saveData(self,filename,params):
+        """Saves data and metadata
+        Author: Simon Laffan"""
+        with open(filename, 'w') as fout:
+            p = pandas.DataFrame({'Initial Voltage':[params[0]],'Final Voltage':[params[1]],'Voltage Ceiling':[params[2]],'Voltage Floor':[params[3]],'Scan Rate':[params[4]],'Cycles':[params[5]]})
+            p.to_csv(fout,header=True,index=None)
+            pandas.DataFrame({'Potential':list(self.potentialData),'Current':list(self.currentData)}).to_csv(fout,header=True,index=None)
+            
+
 
     ####### DATA STORAGE CODE ########        
     """Keenan's SQL code below"""
@@ -490,7 +499,6 @@ class ToolBox:
         p = self.params
         params = {'initialVoltage':p[0], 'finalVoltage':p[1], 'voltageCeiling':p[2], 'voltageFloor':p[3], 'scanRate':p[4], 'cycles': p[5]}
         return params, v, i
-        
         
 
 

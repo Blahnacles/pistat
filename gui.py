@@ -222,6 +222,9 @@ class SimpleMode(tk.Frame):
         voltButton = ttk.Button(self, text="Set Voltages")
         voltButton.place(x=650, y=95)
 
+        saveButton = ttk.Button(self, text="Save Data")
+        saveButton.place(x=150, y=445)
+
 
         # Connect & calibrate button
         conButton = ttk.Button(self, text="Connect Potentiostat")
@@ -339,6 +342,13 @@ class SimpleMode(tk.Frame):
                     testEngine.cvCancel()
                 return
             tk.messagebox.showinfo(title="Device Idle", message="The potentiostat device manager is already in Idle mode")
+
+        def saveData():
+            """Open a dialog to get a file name from the user
+            Save the metadata and data in this file
+            Author: Simon Laffan"""
+            filePath = tk.filedialog.asksaveasfilename(defaultextension='.csv')
+            testEngine.saveCsv(filePath)
             
 
         # Assigning commands to buttons
@@ -349,6 +359,7 @@ class SimpleMode(tk.Frame):
         calibrateButton.configure(command=lambda: testEngine.dummy())
         sLRBcancel.configure(command=lambda:lineCancel())
         cancelButton.configure(command=lambda:cvCancel())
+        saveButton.configure(command=lambda:saveData())
 
         
 
