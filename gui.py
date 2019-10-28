@@ -203,7 +203,7 @@ class SimpleMode(tk.Frame):
         sLRBcancel.place_forget()
         buttonExpertMode = ttk.Button(self, text="Expert")
         #buttonExpertMode.grid(column=3, row=1)
-        buttonExpertMode.place(x=50, y=445, width = 60)
+        buttonExpertMode.place(x=650, y=380, width = 60)
         calibrateButton = ttk.Button(self, text="Load Data")
         #calibrateButton.grid(column=3, row=6)
         calibrateButton.place(x=510, y=200)
@@ -223,7 +223,7 @@ class SimpleMode(tk.Frame):
         voltButton.place(x=650, y=95)
 
         saveButton = ttk.Button(self, text="Save Data")
-        saveButton.place(x=150, y=445)
+        saveButton.place(x=510, y=380)
 
 
         # Connect & calibrate button
@@ -348,7 +348,13 @@ class SimpleMode(tk.Frame):
             Save the metadata and data in this file
             Author: Simon Laffan"""
             filePath = tk.filedialog.asksaveasfilename(defaultextension='.csv')
-            testEngine.saveCsv(filePath)
+            try: testEngine.saveCsv(filePath)
+            except:
+                tk.messagebox.showerror(title="Save failed",message="Failed to save data. See log for specific details.\nIs the file in the correct .csv format?")
+                return
+            tk.messagebox.showinfo(title="Save Successful!",message="The data was successfully saved in "+filePath)
+
+
             
 
         # Assigning commands to buttons
