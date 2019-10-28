@@ -98,8 +98,8 @@ class GraphData:
     def __init__(self):
         self.potentialOffset = 0
         self.currentOffset = 0
-        self.potentialData = collections.deque(maxlen=200)
-        self.currentData = collections.deque(maxlen=200)
+        self.potentialData = collections.deque(maxlen=500)
+        self.currentData = collections.deque(maxlen=500)
         self.potentialData.append(0)
         self.currentData.append(0)
         self.currentRange = b'RANGE 1' # current ranging - must be set to the correct order of magnitude to eliminate noise
@@ -309,8 +309,12 @@ class ToolBox:
         # Handle overflow
         if potential<-8:
             potential+=16
-        print("v =",potential)
-        print("i =",current)
+        #print("v =",potential)
+        #print("i =",current)
+        if current <-0.1:
+            print("v =",potential)
+            print("i =",current)
+            print(self.params)
         self.potData.potentialData.append(potential)
         if self.potData.currentRange == b'RANGE 3':
             current *= 1e3
@@ -616,7 +620,6 @@ class UsbStat:
             combined_value = (msb%64)*2**16+midb*2**8+lsb # Get rid of overflow bits
             ovh = (msb > 63) and (msb < 128) # Check for Theoverflow high (B22 set)
             ovl = (msb > 127) # Check for overflow low (B23 set)
-            print("----new read: ovh =",ovh,"ovl =",ovl,"combined value =",combined_value)
             if ovl or not ovh:
                 return (combined_value - 2**22)
             else:
