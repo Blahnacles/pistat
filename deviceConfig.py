@@ -299,8 +299,6 @@ class ToolBox:
         Author - Simon Laffan
         """
         potential, current = self.potStat.readPotentialCurrent()
-        print("v =",potential)
-        print("i =",current)
         shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
@@ -312,6 +310,9 @@ class ToolBox:
         #print("i =",current)
         if current<-40:
             current += 50
+        print("v =",potential)
+        print("i =",current)
+        print("pOff: ",self.potData.potentialOffset,"  cOff: ",self.potData.currentOffset)
         self.potData.potentialData.append(potential)
         if self.potData.currentRange == b'RANGE 3':
             current *= 1e3
