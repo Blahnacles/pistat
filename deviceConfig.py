@@ -490,6 +490,9 @@ class ToolBox:
         self.potData.currentRange = cRange
         # change current range setting on hardware
         self.potStat.send_command(cRange, b'OK')
+        if len(self.potData.currentData)>10:
+            self.potData.currentOffset = iMean
+            print(iMean)
 
     def saveArrays(self):
         """TEAMS-203
