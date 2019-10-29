@@ -310,7 +310,6 @@ class ToolBox:
         shuntSel = self.potStat.shuntSelector
         sc = self.potStat.shunt_calibration[shuntSel]
         print(potential)
-        print(self.potData.potentialOffset)
         potential = (potential - self.potData.potentialOffset)/2097152.*8.
         current = (current -self.potData.currentOffset)/2097152.*25./(sc*100.**shuntSel)
         # Handle overflow

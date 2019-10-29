@@ -26,7 +26,7 @@ def actionThread():
     Should be run within a thread object"""
     while 1:
         piStat.action(devLock)
-        time.sleep(0.01)
+        time.sleep(0.05)
 
 def connectDisconnect():
     """Establish or destroy connection with the device"""
