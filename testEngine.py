@@ -25,7 +25,8 @@ def actionThread():
     """Simple function to begin the action loop/state machine
     Should be run within a thread object"""
     while 1:
-        time.sleep(piStat.action(devLock))
+        piStat.action(devLock)
+        time.sleep(0.01)
 
 def connectDisconnect():
     """Establish or destroy connection with the device"""
