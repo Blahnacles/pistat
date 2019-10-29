@@ -410,6 +410,10 @@ class ToolBox:
                 self.state = States.Measuring_CV
                 lock.release()
                 # set timestamp for measurement stage, aids in calculation of dT
+                for j in range(5):
+                    self.potStat.vOutput(value=self.params[0])
+                    self.dataRead()
+                self.potData.clearData()
                 self.potData.timeStamp = datetime.now()
                 self.potData.lastTime= datetime.now()
         elif s == States.Measuring_CV:
