@@ -387,6 +387,10 @@ class ToolBox:
             self.potStat.setCellStatus(True) # Cell on
             if self.cvFlag:
                 #skip this stage
+                for j in range(5):
+                    self.potStat.vOutput(value=self.params[0])
+                    self.dataRead()
+                self.potData.clearData()
                 self.potData.timeStamp = datetime.now()
                 self.potData.lastTime = datetime.now()
                 self.potData.clearData()
