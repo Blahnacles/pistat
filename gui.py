@@ -402,49 +402,59 @@ class ExpertMode(tk.Frame):
         def paramGet(entryField, paramIndex):
             entryField.delete(0,tk.END)
             entryField.insert(0, testEngine.piStat.params[paramIndex])
-        
+
+    
+
+        colourLabelY = tk.Label(self, background="#326ada", width=5, height=16)
+        colourLabelY.place(x=0, y=0, height=480, width=50 )
+
+        colourLabelX = tk.Label(self, background="#326ada", width=54, height=2)
+        colourLabelX.place(x=0, y=440, height=40, width=800)
 
         label1 = tk.Label(self, text = "Voltage Floor")
-        label1.grid(column=1, row = 0, padx=3, pady=3 )
+        label1.place(x=70, y=50)
 
-        label1 = tk.Label(self, text = "Initial Voltage")
-        label1.grid(column=1, row = 1, padx=3, pady=3  )
+        label2 = tk.Label(self, text = "Initial Voltage")
+        label2.place(x=70, y=120)
 
-        label1 = tk.Label(self, text = "Scan Rate (V/s)")
-        label1.grid(column=1, row = 2, padx=3, pady=3  )
+        label3 = tk.Label(self, text = "Scan Rate (V/s)")
+        label3.place(x=70, y=190)
 
-        label1 = tk.Label(self, text = "Voltage Ceiling")
-        label1.grid(column=3, row = 0, padx=3, pady=3  )
+        label4 = tk.Label(self, text = "Voltage Ceiling")
+        label4.place(x=70, y=260)
 
-        label1 = tk.Label(self, text = "Final Voltage")
-        label1.grid(column=3, row = 1, padx=3, pady=3 )
+        label5 = tk.Label(self, text = "Final Voltage")
+        label5.place(x=70, y=330)
 
-        label1 = tk.Label(self, text = "Cycles (zero for ramp)")
-        label1.grid(column=3, row = 2, padx=3, pady=3  )
+        label6 = tk.Label(self, text = "Cycles (zero for ramp)")
+        label6.place(x=70, y=400)
 
         voltageFloorEntry = tk.Entry(self)
-        voltageFloorEntry.grid(column=2, row = 0)
+        voltageFloorEntry.place(x=250, y=50)
         paramGet(voltageFloorEntry, 3)
 
         voltageCeilingEntry = tk.Entry(self)
-        voltageCeilingEntry.grid(column=4, row = 0)
+        voltageCeilingEntry.place(x=250, y=120)
         paramGet(voltageCeilingEntry, 2)
 
         initialVoltageEntry = tk.Entry(self)
-        initialVoltageEntry.grid(column=2, row = 1)
+        initialVoltageEntry.place(x=250, y=190)
         paramGet(initialVoltageEntry, 0)
 
         finalVoltageEntry = tk.Entry(self)
-        finalVoltageEntry.grid(column=4, row = 1)
+        finalVoltageEntry.place(x=250, y=260)
         paramGet(finalVoltageEntry, 1)
 
         scanRateEntry = tk.Entry(self)
-        scanRateEntry.grid(column=2, row = 2)
+        scanRateEntry.place(x=250, y=330)
         paramGet(scanRateEntry, 4)
 
         cycleEntry = tk.Entry(self)
-        cycleEntry.grid(column=4, row = 2)
+        cycleEntry.place(x=250, y=400)
         paramGet(cycleEntry, 5)
+
+        seperationLabel = tk.Label(self, background="black")
+        seperationLabel.place(x=500, y=0, height=480, width=5)
 
         def refresh():
             """Sets the entry values to their backend values
@@ -532,10 +542,10 @@ class ExpertMode(tk.Frame):
 
 
             
-        ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode)).grid(column=6, row=0)
-        ttk.Button(self, text="Apply", command=paramSet).grid(column=2, row =3)
-        ttk.Button(self, text="Refresh", command=refresh).grid(column=3,row=3)
-        ttk.Button(self, text="Reset parameters", command=setDefaults).grid(column=4,row=3)
+        ttk.Button(self, text="Simple", command=lambda: controller.show_frame(SimpleMode)).place(x=600, y=50)
+        ttk.Button(self, text="Apply", command=paramSet).place(x=600, y=120)
+        ttk.Button(self, text="Refresh", command=refresh).place(x=600, y=190)
+        ttk.Button(self, text="Reset parameters", command=setDefaults).place(x=600, y=260)
 
 
 
