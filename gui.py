@@ -285,6 +285,7 @@ class SimpleMode(tk.Frame):
             global pSelect, xCoords, yCoords
             if pSelect == 2:
                 h = calcHeight()
+                testEngine.setPeak(h)
                 tk.messagebox.showinfo("Peak height calculation","Peak height: "+format(1000*h[0],"f")+" mA")
                 setLinearRegressionButton.configure(text="Select Data Points")
                 xCoords = []

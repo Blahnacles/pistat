@@ -103,6 +103,11 @@ def setVoltage(vLow, vHigh):
     a=piStat.params[3]
     devLock.release()
     return a,b
+
+def setPeak(height):
+    """Assigns a value to be saved for the peak height
+    Author: Simon Laffan"""
+    piStat.potData.peakHeight = height
 # Create the daemon thread (exits when main thread exits)
 deviceThread = threading.Thread(target=actionThread,name='deviceThread', daemon=True)
 # Start the daemon thread

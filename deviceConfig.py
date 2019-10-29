@@ -106,6 +106,7 @@ class GraphData:
         # 2uA range - RANGE 1; 200uA range - RANGE 2; 20mA range - RANGE 3
         self.timeStamp = None # to hold start time for sweep data
         self.lastTime = None
+        self.peakHeight = None
     def zeroOffset(self):
         """ Set offset values for pot&current, based on the last few values
         To be ran after 30 seconds calibration; see SOP for more information
@@ -164,7 +165,13 @@ class GraphData:
         with open(filename, 'w') as fout:
             p = pandas.DataFrame({'Initial Voltage':[params[0]],'Final Voltage':[params[1]],'Voltage Ceiling':[params[2]],'Voltage Floor':[params[3]],'Scan Rate':[params[4]],'Cycles':[params[5]]})
             p.to_csv(fout,header=True,index=None)
-            pandas.DataFrame({'Potential':list(self.potentialData),'Current':list(self.currentData)}).to_csv(fout,header=True,index=None)
+            if self.peakHeight is not None:
+                h = pandas.DataFrame({'Peak Height':[self.peakHeight]}).to_csv(fout,header=True,index=None)
+            if self.currentRange == b'RANGE 3':
+                cString = 'Current (mA)'
+            else:
+                cString = 'Current (uA)'
+            pandas.DataFrame({'Potential (V)':list(self.potentialData),cString:list(self.currentData)}).to_csv(fout,header=True,index=None)
             
 
 
