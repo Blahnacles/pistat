@@ -373,7 +373,7 @@ class ToolBox:
             lock.release()
             self.potStat.setCellStatus(False)
         elif s == States.Idle:
-            pass
+            self.potStat.setCellStatus(False)
         elif s == States.CVInit:
             self.potStat.setCellStatus(True) # Cell on
             if self.cvFlag:
