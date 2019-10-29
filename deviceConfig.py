@@ -476,7 +476,7 @@ class ToolBox:
             print("data read from .csv")
             self.state = States.Idle
             lock.release()
-        return 0.1
+        return 0.01
 
     def getData(self):
         """Returns plottable data
@@ -546,7 +546,6 @@ class UsbStat:
         self.timeStamp = None
         self.shuntSelector = 0
         self.fwdPotential = 1 # in volts
-        self.startPot = -0.4
 
     #######################################
     ######## Calibration functions ########

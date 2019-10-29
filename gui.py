@@ -403,11 +403,6 @@ class ExpertMode(tk.Frame):
             entryField.delete(0,tk.END)
             entryField.insert(0, testEngine.piStat.params[paramIndex])
         
-        colourLabelY = tk.Label(self, background="#326ada", width=3, height=18)
-        colourLabelY.grid(column=0, rowspan=6)
-
-        colourLabelX = tk.Label(self, background="#326ada", width=57, height=2)
-        colourLabelX.grid(column=1, row=6, columnspan=5)
 
         label1 = tk.Label(self, text = "Voltage Floor")
         label1.grid(column=1, row = 0, padx=3, pady=3 )
