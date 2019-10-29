@@ -391,7 +391,7 @@ class ToolBox:
                 self.state = States.Measuring_CV
             else:
                 self.cvFlag = True
-                self.potStat.vOutput(value=-0.4) # setting the starting potential
+                self.potStat.vOutput(value=self.params[0]) # setting the starting potential
                 self.potStat.send_command(b'POTENTIOSTATIC', b'OK') # potentiostatic mode set
                 self.potData.currentRange = b'RANGE 1' # set highest current range - should be 1 by default anyway
                 sleep(0.5)
