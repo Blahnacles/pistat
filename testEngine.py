@@ -99,6 +99,8 @@ def setVoltage(vLow, vHigh):
     devLock.acquire()
     piStat.params[2] = vHigh
     piStat.params[3] = vLow
+    piStat.params[0] = vLow
+    piStat.params[1] = vHigh
     # Unit test
     b=piStat.params[2]
     a=piStat.params[3]
