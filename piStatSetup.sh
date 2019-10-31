@@ -9,6 +9,7 @@
 # Safe to run multiple times - for debugging etc
 ################################################
 # Get python 3.6
+sudo $0
 sudo apt-get update
 sudo apt-install python3.6
 # testing will happen with 3.6
